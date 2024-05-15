@@ -35,7 +35,38 @@ if (isset($_GET['id']) && $_GET['id'] > 0) {
 		</div>
 		<div class="form-group">
 			<label for="price" class="control-label">Giá</label>
-			<input type="number" name="price" id="price" class="form-control form-control-sm rounded-0 text-right" value="<?php echo isset($price) ? $price : ''; ?>" required />
+			<br>
+			<?php 
+			if($has_attribute == 1){
+				$qry = $conn->query("SELECT id, `name` from `attributes` where delete_flag=0 order by `name`desc ");
+				if ($qry->num_rows > 1) {
+					$i=1;
+					while ($row = $qry->fetch_assoc()) :
+						//kiểm tra giá
+						$attrPrice = '';
+						if(isset($id)){
+							$query = $conn->query("SELECT `price` from `product_attributes` where product_id='".$id."' and attribute_id='".$row['id']."' and delete_flag=0");
+							if ($query->num_rows > 0) {
+								while($check = $query->fetch_assoc()){
+									$attrPrice = $check['price'];
+								}
+							}
+						}
+						?>
+						<label for=""><?php echo $row['name'];?></label>
+						<input type="number" name="price[<?php echo $row['id'];?>]" id="price_<?php echo $i;?>" class="form-control form-control-sm rounded-0 text-right" value="<?php echo $attrPrice; ?>" required />
+					<?php 
+					$i++;
+					endwhile;
+				}else{
+					?>
+					<input type="number" name="price" id="price" class="form-control form-control-sm rounded-0 text-right" value="<?php echo isset($price) ? $price : ''; ?>" required />
+					<?php
+				}
+			}else{?>
+				<input type="number" name="price" id="price" class="form-control form-control-sm rounded-0 text-right" value="<?php echo isset($price) ? $price : ''; ?>" required />
+			<?php }
+			?>
 		</div>
 		<div class="form-group">
 			<label for="status" class="control-label">Trạng thái</label>

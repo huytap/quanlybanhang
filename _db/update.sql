@@ -1,0 +1,1 @@
+ALTER TABLE `product_list` ADD `has_attribute` INT NOT NULL DEFAULT '0' AFTER `price`;

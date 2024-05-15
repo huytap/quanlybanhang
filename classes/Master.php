@@ -50,7 +50,7 @@ Class Master extends DBConnection {
 			return $this->capture_err();
 		if($check > 0){
 			$resp['status'] = 'failed';
-			$resp['msg'] = "Category Name already exists.";
+			$resp['msg'] = "Category Name đã tồn tại.";
 			return json_encode($resp);
 			exit;
 		}
@@ -81,7 +81,7 @@ Class Master extends DBConnection {
 		$del = $this->conn->query("UPDATE `category_list` set `delete_flag` = 1 where id = '{$id}'");
 		if($del){
 			$resp['status'] = 'success';
-			$this->settings->set_flashdata('success'," Category successfully deleted.");
+			$this->settings->set_flashdata('success'," Đã xóa thành công.");
 		}else{
 			$resp['status'] = 'failed';
 			$resp['error'] = $this->conn->error;
@@ -89,9 +89,69 @@ Class Master extends DBConnection {
 		return json_encode($resp);
 
 	}
+
+	function save_attribute(){
+		extract($_POST);
+		$data = "";
+		foreach($_POST as $k =>$v){
+			if(!in_array($k,array('id'))){
+				if(!empty($data)) $data .=",";
+				$v = $this->conn->real_escape_string($v);
+				$data .= " `{$k}`='{$v}' ";
+			}
+		}
+		$check = $this->conn->query("SELECT * FROM `attributes` where delete_flag=0 AND `name` = '{$name}' ".(!empty($id) ? " and id != {$id} " : "")." ")->num_rows;
+		if($this->capture_err())
+			return $this->capture_err();
+		if($check > 0){
+			$resp['status'] = 'failed';
+			$resp['msg'] = "Thuộc tính đã tồn tại.";
+			return json_encode($resp);
+			exit;
+		}
+		if(empty($id)){
+			$sql = "INSERT INTO `attributes` set {$data} ";
+		}else{
+			$sql = "UPDATE `attributes` set {$data} where id = '{$id}' ";
+		}
+			$save = $this->conn->query($sql);
+		if($save){
+			$bid = !empty($id) ? $id : $this->conn->insert_id;
+			$resp['status'] = 'success';
+			if(empty($id))
+				$resp['msg'] = "Đã được lưu thành công.";
+			else
+				$resp['msg'] = " Đã được cập nhật thành công.";
+			
+		}else{
+			$resp['status'] = 'failed';
+			$resp['err'] = $this->conn->error."[{$sql}]";
+		}
+		if($resp['status'] == 'success')
+			$this->settings->set_flashdata('success',$resp['msg']);
+			return json_encode($resp);
+	}
+	function delete_attribute(){
+		extract($_POST);
+		$del = $this->conn->query("UPDATE `attributes` set `delete_flag` = 1 where id = '{$id}'");
+		if($del){
+			$resp['status'] = 'success';
+			$this->settings->set_flashdata('success'," Đã xóa thành công.");
+		}else{
+			$resp['status'] = 'failed';
+			$resp['error'] = $this->conn->error;
+		}
+		return json_encode($resp);
+
+	}
+
 	function save_product(){
 		extract($_POST);
 		$data = "";
+		$priceArr = $_POST['price'];
+		if(isset($_POST['price']) && count($_POST['price']) > 1){
+			unset($_POST['price']);
+		}
 		foreach($_POST as $k =>$v){
 			if(!in_array($k,array('id'))){
 				if(!empty($data)) $data .=",";
@@ -104,7 +164,7 @@ Class Master extends DBConnection {
 			return $this->capture_err();
 		if($check > 0){
 			$resp['status'] = 'failed';
-			$resp['msg'] = "Product Name already exists.";
+			$resp['msg'] = "Món đã tồn tại.";
 			return json_encode($resp);
 			exit;
 		}
@@ -115,12 +175,34 @@ Class Master extends DBConnection {
 		}
 			$save = $this->conn->query($sql);
 		if($save){
+			if(count($priceArr) > 1){
+				foreach($priceArr as $attr_id => $val){
+					if(isset($id)){
+						$query = $this->conn->query("SELECT `price` from `product_attributes` where product_id='".$id."' and attribute_id='".$attr_id."' and delete_flag=0");
+						if ($query->num_rows > 0) {
+							while($check = $query->fetch_assoc()){
+								$sqlAttr = "UPDATE `product_attributes` set `price`=$val where `product_id`=".$id." AND attribute_id=$attr_id AND delete_flag=0";
+							}
+						}else{
+							$sqlAttr = "INSERT INTO `product_attributes` set `product_id`=".$id.", attribute_id=$attr_id, `price`=$val";
+						}
+					}else{
+						$pro = $this->conn->query("SELECT id FROM `product_list` where delete_flag=0 order by id desc");
+						if ($qry->num_rows > 0) {
+							foreach ($pro->fetch_assoc() as $k => $v) {
+								$sqlAttr = "INSERT INTO `product_attributes` set `product_id`=".$pro['id'].", attribute_id=$attr_id, `price`=$val";
+							}
+						}
+					}
+					$this->conn->query($sqlAttr);
+				}
+			}
 			$pid = !empty($id) ? $id : $this->conn->insert_id;
 			$resp['status'] = 'success';
 			if(empty($id))
-				$resp['msg'] = "New Product successfully saved.";
+				$resp['msg'] = "Đã thêm thành công.";
 			else
-				$resp['msg'] = " Product successfully updated.";
+				$resp['msg'] = " Đã cập nhật thành công.";
 			if(!empty($_FILES['img']['tmp_name'])){
 				$dir = 'uploads/products/';
 				if(!is_dir(base_app.$dir))
@@ -294,6 +376,12 @@ switch ($action) {
 	break;
 	case 'delete_category':
 		echo $Master->delete_category();
+	break;
+	case 'save_attribute':
+		echo $Master->save_attribute();
+	break;
+	case 'delete_attribute':
+		echo $Master->delete_attribute();
 	break;
 	case 'save_product':
 		echo $Master->save_product();

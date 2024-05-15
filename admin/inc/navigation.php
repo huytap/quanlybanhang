@@ -31,16 +31,7 @@
                   </p>
                 </a>
               </li>
-              <?php if ($_settings->userdata('type') != 3) : ?>
-                <li class="nav-item dropdown">
-                  <a href="<?php echo base_url ?>admin/?page=products" class="nav-link nav-products">
-                    <i class="nav-icon fas fa-mug-hot"></i>
-                    <p>
-                      Danh sách món
-                    </p>
-                  </a>
-                </li>
-              <?php else : ?>
+              <?php if ($_settings->userdata('type') == 3) : ?>
                 <li class="nav-item dropdown">
                   <a href="<?php echo base_url ?>admin/?page=sales/manage_sale" class="nav-link nav-sales_manage_sale">
                     <i class="nav-icon fas fa-plus"></i>
@@ -73,6 +64,22 @@
                     <i class="nav-icon fas fa-th-list"></i>
                     <p>
                       Danh mục
+                    </p>
+                  </a>
+                </li>
+                <li class="nav-item dropdown">
+                  <a href="<?php echo base_url ?>admin/?page=products" class="nav-link nav-products">
+                    <i class="nav-icon fas fa-mug-hot"></i>
+                    <p>
+                      Danh sách món
+                    </p>
+                  </a>
+                </li>
+                <li class="nav-item dropdown">
+                  <a href="<?php echo base_url ?>admin/?page=attributes" class="nav-link nav-attributes">
+                    <i class="nav-icon fas fa-th-list"></i>
+                    <p>
+                      Thuộc tính
                     </p>
                   </a>
                 </li>
