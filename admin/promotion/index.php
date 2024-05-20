@@ -5,7 +5,7 @@
 <?php endif; ?>
 <div class="card card-outline rounded-0 card-navy">
 	<div class="card-header">
-		<h3 class="card-title">Size</h3>
+		<h3 class="card-title">Danh sách chương trình giảm giá</h3>
 		<div class="card-tools">
 			<a href="javascript:void(0)" id="create_new" class="btn btn-flat btn-primary"><span class="fas fa-plus"></span> Tạo mới</a>
 		</div>
@@ -16,7 +16,11 @@
 				<colgroup>
 					<col width="5%">
 					<col width="15%">
-					<col width="50%">
+					<col width="20%">
+					<col width="20%">
+					<col width="15%">
+					<col width="15%">
+					<col width="15%">
 					<col width="15%">
 					<col width="15%">
 				</colgroup>
@@ -24,9 +28,11 @@
 					<tr>
 						<th>#</th>
 						<th>Ngày tạo</th>
-						<th>Tên</th>
-						<th>Giá</th>
-						<th>Danh mục</th>
+						<th>Tên chương trình</th>
+						<th>Ngày áp dụng</th>
+						<th>Hình thức</th>
+						<th>Giá trị giảm</th>
+						<th>Sản phẩm</th>
 						<th>Trạng thái</th>
 						<th>#</th>
 					</tr>
@@ -34,15 +40,26 @@
 				<tbody>
 					<?php
 					$i = 1;
-					$qry = $conn->query("SELECT * from `attributes` where delete_flag = 0 order by `type`, `name` asc ");
+					$sql = "SELECT *
+					from `promotion` 
+					where `delete_flag`=0 order by `date_created` ";
+
+					$qry = $conn->query($sql);
+					if($qry->num_rows > 0)
 					while ($row = $qry->fetch_assoc()) :
 					?>
 						<tr>
 							<td class="text-center"><?php echo $i++; ?></td>
 							<td><?php echo date("Y-m-d H:i", strtotime($row['date_created'])) ?></td>
 							<td><?php echo $row['name'] ?></td>
-							<td><?php echo number_format($row['price']) ?></td>
-							<td><?php echo $row['type'] != '' ? ATTR[$row['type']] : ATTR[0];?></td>
+							<td><?php echo $row['from_date'] ?> - <?php echo $row['to_date'] ?></td>
+							<td class="text-right">
+								<?php 
+								if(isset(PROMOTION_TYPE[$row['type']]))
+									echo PROMOTION_TYPE[$row['type']];
+								?>
+							</td>
+							<td class="text-center"><?php echo $row['discount'];?></td>
 							<td class="text-center">
 								<?php if ($row['status'] == 1) : ?>
 									<span class="badge badge-success px-3 rounded-pill">Hoạt động</span>
@@ -73,31 +90,31 @@
 <script>
 	$(document).ready(function() {
 		$('.delete_data').click(function() {
-			_conf("Bạn có chắc chắn muốn xóa danh mục này?", "delete_attribute", [$(this).attr('data-id')])
+			_conf("Bạn có chắc chắn muốn xóa chương trình này không?", "delete_promotion", [$(this).attr('data-id')])
 		})
 		$('#create_new').click(function() {
-			uni_modal("<i class='fa fa-plus'></i> Tạo mới", "attributes/manage_attribute.php")
+			uni_modal("<i class='fa fa-plus'></i> Tạo mới", "promotion/manage.php")
 		})
 		$('.view_data').click(function() {
-			uni_modal("<i class='fa fa-bars'></i> Chi tiết", "attributes/view_attribute.php?id=" + $(this).attr('data-id'))
+			uni_modal("<i class='fa fa-bars'></i> Chi tiết", "promotion/view.php?id=" + $(this).attr('data-id'))
 		})
 		$('.edit_data').click(function() {
-			uni_modal("<i class='fa fa-edit'></i> Cập nhật", "attributes/manage_attribute.php?id=" + $(this).attr('data-id'))
+			uni_modal("<i class='fa fa-edit'></i> Cập nhật", "promotion/manage.php?id=" + $(this).attr('data-id'))
 		})
 		$('.table').dataTable({
 			columnDefs: [{
 				orderable: false,
-				targets: [4, 5]
+				targets: [6]
 			}],
 			order: [0, 'asc']
 		});
 		$('.dataTable td,.dataTable th').addClass('py-1 px-2 align-middle')
 	})
 
-	function delete_attribute($id) {
+	function delete_promotion($id) {
 		start_loader();
 		$.ajax({
-			url: _base_url_ + "classes/Master.php?f=delete_attribute",
+			url: _base_url_ + "classes/Master.php?f=delete_promotion",
 			method: "POST",
 			data: {
 				id: $id

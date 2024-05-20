@@ -22,6 +22,13 @@ if (isset($_GET['id']) && $_GET['id'] > 0) {
 			<textarea type="text" name="description" id="description" class="form-control form-control-sm rounded-0" required><?php echo isset($description) ? $description : ''; ?></textarea>
 		</div>
 		<div class="form-group">
+			<label for="has_attribute" class="control-label">Có nhiều Size</label>
+			<select name="has_attribute" id="has_attribute" class="form-control form-control-sm rounded-0" required>
+				<option value="1" <?php echo isset($has_attribute) && $has_attribute == 1 ? 'selected' : '' ?>>Có</option>
+				<option value="0" <?php echo isset($has_attribute) && $has_attribute == 0 ? 'selected' : '' ?>>Không</option>
+			</select>
+		</div>
+		<div class="form-group">
 			<label for="status" class="control-label">Trạng thái</label>
 			<select name="status" id="status" class="form-control form-control-sm rounded-0" required>
 				<option value="1" <?php echo isset($status) && $status == 1 ? 'selected' : '' ?>>Hoạt động</option>

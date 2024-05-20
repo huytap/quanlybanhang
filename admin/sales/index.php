@@ -29,6 +29,7 @@
 							<th>Số HĐ</th>
 							<th>Khách hàng</th>
 							<th>Tiền</th>
+							<th>Trạng thái</th>
 							<th>#</th>
 						</tr>
 					</thead>
@@ -36,9 +37,9 @@
 						<?php
 						$i = 1;
 						if ($_settings->userdata('type') == 3) :
-							$qry = $conn->query("SELECT * FROM `sale_list` where user_id = '{$_settings->userdata('id')}' order by unix_timestamp(date_updated) desc ");
+							$qry = $conn->query("SELECT * FROM `sale_list` where user_id = '{$_settings->userdata('id')}' order by `status`, unix_timestamp(date_updated) desc ");
 						else :
-							$qry = $conn->query("SELECT * FROM `sale_list` order by unix_timestamp(date_updated) desc ");
+							$qry = $conn->query("SELECT * FROM `sale_list` order by `status`, unix_timestamp(date_updated) desc ");
 						endif;
 						while ($row = $qry->fetch_assoc()) :
 						?>
@@ -54,6 +55,15 @@
 									<p class="m-0 truncate-1"><?= $row['client_name'] ?></p>
 								</td>
 								<td class='text-right'><?= format_num($row['amount'], 0) ?></td>
+								<td class="text-center">
+									<?php 
+									if($row['status'] == 1){
+										echo '<span class="btn btn-primary">Đã thanh toán</span>';
+									}else{
+										echo '<span class="btn btn-warning">Chưa thanh toán</span>';
+									}
+									?>
+								</td>
 								<td align="center">
 									<a class="btn btn-default bg-gradient-light btn-flat btn-sm" href="?page=sales/view_details&id=<?php echo $row['id'] ?>"><span class="fa fa-eye text-dark"></span> View</a>
 								</td>

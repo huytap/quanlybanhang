@@ -36,7 +36,12 @@
 				<tbody>
 					<?php
 					$i = 1;
-					$qry = $conn->query("SELECT p.*, c.name as `category` from `product_list` p inner join category_list c on p.category_id = c.id where p.delete_flag = 0 order by p.`name` asc ");
+					$sql = "SELECT p.*, c.name as `category` 
+					from `product_list` p 
+					inner join category_list c on p.category_id = c.id 
+					where p.delete_flag = 0 order by c.`name`,p.`name` asc ";
+
+					$qry = $conn->query($sql);
 					while ($row = $qry->fetch_assoc()) :
 					?>
 						<tr>
@@ -44,7 +49,27 @@
 							<td><?php echo date("Y-m-d H:i", strtotime($row['date_created'])) ?></td>
 							<td><?php echo $row['category'] ?></td>
 							<td><?php echo $row['name'] ?></td>
-							<td class="text-right"><?php echo format_num($row['price'], 0); ?></td>
+							<td class="text-right">
+								<?php 
+								// //$query = $conn->query("SELECT `price`, a.name from `product_attributes` pa left join attributes a on pa.attribute_id=a.id where product_id='".$row['id']."' and pa.delete_flag=0");
+								// if ($query->num_rows > 0) {
+								// 	while($check = $query->fetch_assoc()){
+								// 		$attrPrice = $check['price'];
+								// 		echo $check['name'].': '. number_format($check['price']);
+								// 		echo '<br/>';
+								// 	}
+								// }else{
+								// 	echo format_num($row['price'], 0);
+								// }
+								echo number_format($row['price']);
+								// if($row['upsize'] > 0){
+								// 	$query = $conn->query("SELECT `price` from `attributes` where `type`=0 and `delete_flag`=0");
+								// 	if ($query->num_rows > 0) {
+								// 		echo format_num($row['price']);
+								// 	}
+								// }
+								?>
+							</td>
 							<td class="text-center">
 								<?php if ($row['status'] == 1) : ?>
 									<span class="badge badge-success px-3 rounded-pill">Hoạt động</span>

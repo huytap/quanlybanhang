@@ -64,9 +64,9 @@ Class Master extends DBConnection {
 			$bid = !empty($id) ? $id : $this->conn->insert_id;
 			$resp['status'] = 'success';
 			if(empty($id))
-				$resp['msg'] = "New Category successfully saved.";
+				$resp['msg'] = "Thêm mới thành công.";
 			else
-				$resp['msg'] = " Category successfully updated.";
+				$resp['msg'] = " Cập nhật thành công.";
 			
 		}else{
 			$resp['status'] = 'failed';
@@ -149,9 +149,9 @@ Class Master extends DBConnection {
 		extract($_POST);
 		$data = "";
 		$priceArr = $_POST['price'];
-		if(isset($_POST['price']) && count($_POST['price']) > 1){
-			unset($_POST['price']);
-		}
+		// if(isset($_POST['price']) && count($_POST['price']) > 1){
+		// 	unset($_POST['price']);
+		// }
 		foreach($_POST as $k =>$v){
 			if(!in_array($k,array('id'))){
 				if(!empty($data)) $data .=",";
@@ -175,28 +175,28 @@ Class Master extends DBConnection {
 		}
 			$save = $this->conn->query($sql);
 		if($save){
-			if(count($priceArr) > 1){
-				foreach($priceArr as $attr_id => $val){
-					if(isset($id)){
-						$query = $this->conn->query("SELECT `price` from `product_attributes` where product_id='".$id."' and attribute_id='".$attr_id."' and delete_flag=0");
-						if ($query->num_rows > 0) {
-							while($check = $query->fetch_assoc()){
-								$sqlAttr = "UPDATE `product_attributes` set `price`=$val where `product_id`=".$id." AND attribute_id=$attr_id AND delete_flag=0";
-							}
-						}else{
-							$sqlAttr = "INSERT INTO `product_attributes` set `product_id`=".$id.", attribute_id=$attr_id, `price`=$val";
-						}
-					}else{
-						$pro = $this->conn->query("SELECT id FROM `product_list` where delete_flag=0 order by id desc");
-						if ($qry->num_rows > 0) {
-							foreach ($pro->fetch_assoc() as $k => $v) {
-								$sqlAttr = "INSERT INTO `product_attributes` set `product_id`=".$pro['id'].", attribute_id=$attr_id, `price`=$val";
-							}
-						}
-					}
-					$this->conn->query($sqlAttr);
-				}
-			}
+			// if(count($priceArr) > 1){
+			// 	foreach($priceArr as $attr_id => $val){
+			// 		if(isset($id)){
+			// 			$query = $this->conn->query("SELECT `price` from `product_attributes` where product_id='".$id."' and attribute_id='".$attr_id."' and delete_flag=0");
+			// 			if ($query->num_rows > 0) {
+			// 				while($check = $query->fetch_assoc()){
+			// 					$sqlAttr = "UPDATE `product_attributes` set `price`=$val where `product_id`=".$id." AND attribute_id=$attr_id AND delete_flag=0";
+			// 				}
+			// 			}else{
+			// 				$sqlAttr = "INSERT INTO `product_attributes` set `product_id`=".$id.", attribute_id=$attr_id, `price`=$val";
+			// 			}
+			// 		}else{
+			// 			$pro = $this->conn->query("SELECT id FROM `product_list` where delete_flag=0 order by id desc");
+			// 			if ($qry->num_rows > 0) {
+			// 				foreach ($pro->fetch_assoc() as $k => $v) {
+			// 					$sqlAttr = "INSERT INTO `product_attributes` set `product_id`=".$pro['id'].", attribute_id=$attr_id, `price`=$val";
+			// 				}
+			// 			}
+			// 		}
+			// 		$this->conn->query($sqlAttr);
+			// 	}
+			// }
 			$pid = !empty($id) ? $id : $this->conn->insert_id;
 			$resp['status'] = 'success';
 			if(empty($id))
@@ -287,6 +287,11 @@ Class Master extends DBConnection {
 				$data .= " `{$k}`='{$v}' ";
 			}
 		}
+		if(isset($_POST['amount']) && $_POST['amount'] <= $_POST['tendered']){
+			$data .= ", `status`=1 ";
+		}else{
+			$data .= ", `status`=0 ";
+		}
 		if(empty($id)){
 			$sql = "INSERT INTO `sale_list` set {$data} ";
 		}else{
@@ -298,9 +303,9 @@ Class Master extends DBConnection {
 			$resp['sid'] = $sid;
 			$resp['status'] = 'success';
 			if(empty($id))
-				$resp['msg'] = "New Sale successfully saved.";
+				$resp['msg'] = "Thêm mới thành công.";
 			else
-				$resp['msg'] = " Sale successfully updated.";
+				$resp['msg'] = " Cập nhật thành công.";
 			if(isset($product_id)){
 				$data = "";
 				foreach($product_id as $k =>$v){
@@ -319,7 +324,7 @@ Class Master extends DBConnection {
 						$resp['sql'] = $sql_product;
 						$resp['error'] = $this->conn->error;
 						if(empty($id)){
-							$resp['msg'] = "Sale Transaction has failed save.";
+							$resp['msg'] = "Lỗi lưu thông tin hóa đơn.";
 							$this->conn->query("DELETE FROM `sale_products` where sale_id = '{$sid}'");
 						}else{
 							$resp['msg'] = "Sale Transaction has failed update.";
@@ -362,6 +367,114 @@ Class Master extends DBConnection {
 			$this->settings->set_flashdata('success', 'sale\'s Status has been updated successfully.');
 		return json_encode($resp);
 	}
+	//promotion_code
+	function save_promotion_code(){
+		extract($_POST);
+		$data = "";
+		foreach($_POST as $k =>$v){
+			if(!in_array($k,array('id'))){
+				if(!empty($data)) $data .=",";
+				$v = $this->conn->real_escape_string($v);
+				$data .= " `{$k}`='{$v}' ";
+			}
+		}
+		// if(isset($_POST['from_date']) && $_POST['from_date']){
+		// 	$data .= ", `from_date`='".date('Y-m-d', strtotime($_POST['from_date']))."' ";
+		// }
+		// if(isset($_POST['to_date']) && $_POST['to_date']){
+		// 	$data .= ", `to_date`='".date('Y-m-d', strtotime($_POST['to_date']))."' ";
+		// }
+		$check = $this->conn->query("SELECT * FROM `promotion_code` where `code` = '{$code}' and delete_flag!=1")->num_rows;
+		if($this->capture_err())
+			return $this->capture_err();
+		if($check > 0 && !empty($id)){
+			$resp['status'] = 'failed';
+			$resp['msg'] = "Code đã tồn tại.";
+			return json_encode($resp);
+			exit;
+		}
+		if(empty($id)){
+			$sql = "INSERT INTO `promotion_code` set {$data} ";
+		}else{
+			$sql = "UPDATE `promotion_code` set {$data} where id = '{$id}' ";
+		}
+			$save = $this->conn->query($sql);
+		if($save){
+			$bid = !empty($id) ? $id : $this->conn->insert_id;
+			$resp['status'] = 'success';
+			if(empty($id))
+				$resp['msg'] = "Thêm mới thành công.";
+			else
+				$resp['msg'] = " Cập nhật thành công.";
+			
+		}else{
+			$resp['status'] = 'failed';
+			$resp['err'] = $this->conn->error."[{$sql}]";
+		}
+		if($resp['status'] == 'success')
+			$this->settings->set_flashdata('success',$resp['msg']);
+			return json_encode($resp);
+	}
+	function delete_promotion_code(){
+		extract($_POST);
+		$del = $this->conn->query("DELETE FROM `sale_list` where id = '{$id}'");
+		if($del){
+			$resp['status'] = 'success';
+			$this->settings->set_flashdata('success'," Sale successfully deleted.");
+		}else{
+			$resp['status'] = 'failed';
+			$resp['error'] = $this->conn->error;
+		}
+		return json_encode($resp);
+
+	}
+	
+	//promotion
+	function save_promotion(){
+		extract($_POST);
+		$data = "";
+		foreach($_POST as $k =>$v){
+			if(!in_array($k,array('id'))){
+				if(!empty($data)) $data .=",";
+				$v = $this->conn->real_escape_string($v);
+				$data .= " `{$k}`='{$v}' ";
+			}
+		}
+		if(empty($id)){
+			$sql = "INSERT INTO `promotion` set {$data} ";
+		}else{
+			$sql = "UPDATE `promotion` set {$data} where id = '{$id}' ";
+		}
+			$save = $this->conn->query($sql);
+		if($save){
+			$bid = !empty($id) ? $id : $this->conn->insert_id;
+			$resp['status'] = 'success';
+			if(empty($id))
+				$resp['msg'] = "Thêm mới thành công.";
+			else
+				$resp['msg'] = " Cập nhật thành công.";
+			
+		}else{
+			$resp['status'] = 'failed';
+			$resp['err'] = $this->conn->error."[{$sql}]";
+		}
+		if($resp['status'] == 'success')
+			$this->settings->set_flashdata('success',$resp['msg']);
+			return json_encode($resp);
+	}
+	function delete_promotion(){
+		extract($_POST);
+		$del = $this->conn->query("DELETE FROM `sale_list` where id = '{$id}'");
+		if($del){
+			$resp['status'] = 'success';
+			$this->settings->set_flashdata('success'," Sale successfully deleted.");
+		}else{
+			$resp['status'] = 'failed';
+			$resp['error'] = $this->conn->error;
+		}
+		return json_encode($resp);
+
+	}
 }
 
 $Master = new Master();
@@ -397,6 +510,18 @@ switch ($action) {
 	break;
 	case 'update_status':
 		echo $Master->update_status();
+	break;
+	case 'save_promotion':
+		echo $Master->save_promotion();
+	break;
+	case 'delete_promotion_code':
+		echo $Master->delete_promotion_code();
+	break;
+	case 'save_promotion_code':
+		echo $Master->save_promotion_code();
+	break;
+	case 'delete_promotion':
+		echo $Master->delete_promotion();
 	break;
 	default:
 		// echo $sysset->index();

@@ -1,8 +1,9 @@
 <?php
 
 require_once('../../config.php');
+$has_attribute = 0;
 if (isset($_GET['id']) && $_GET['id'] > 0) {
-	$qry = $conn->query("SELECT * from `product_list` where id = '{$_GET['id']}' ");
+	$qry = $conn->query("SELECT P.*, P.name as `product`, C.has_attribute from `product_list` P left join `category_list` C on P.category_id=C.id where P.id = '{$_GET['id']}' ");
 	if ($qry->num_rows > 0) {
 		foreach ($qry->fetch_assoc() as $k => $v) {
 			$$k = $v;
@@ -35,10 +36,14 @@ if (isset($_GET['id']) && $_GET['id'] > 0) {
 		</div>
 		<div class="form-group">
 			<label for="price" class="control-label">Giá</label>
+			<input type="number" name="price" id="price" class="form-control form-control-sm rounded-0 text-right" value="<?php echo isset($price) ? $price : ''; ?>" required />
+			<?php if($has_attribute == 1){?>
+			<br>
+			<label for="upsize" class="control-label">Up size</label>
+			<input type="number" name="upsize" id="upsize" class="form-control form-control-sm rounded-0 text-right" value="<?php echo isset($upsize) ? $upsize : ''; ?>" />
 			<br>
 			<?php 
-			if($has_attribute == 1){
-				$qry = $conn->query("SELECT id, `name` from `attributes` where delete_flag=0 order by `name`desc ");
+				$qry = $conn->query("SELECT id, `name`, `price` from `attributes` where type=0 and price>0 and delete_flag=0 order by `name`desc ");
 				if ($qry->num_rows > 1) {
 					$i=1;
 					while ($row = $qry->fetch_assoc()) :
@@ -58,14 +63,8 @@ if (isset($_GET['id']) && $_GET['id'] > 0) {
 					<?php 
 					$i++;
 					endwhile;
-				}else{
-					?>
-					<input type="number" name="price" id="price" class="form-control form-control-sm rounded-0 text-right" value="<?php echo isset($price) ? $price : ''; ?>" required />
-					<?php
-				}
-			}else{?>
-				<input type="number" name="price" id="price" class="form-control form-control-sm rounded-0 text-right" value="<?php echo isset($price) ? $price : ''; ?>" required />
-			<?php }
+				}	
+			}		
 			?>
 		</div>
 		<div class="form-group">

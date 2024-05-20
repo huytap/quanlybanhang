@@ -3,9 +3,9 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1:3306
--- Generation Time: May 15, 2024 at 08:01 AM
+-- Generation Time: May 20, 2024 at 09:18 AM
 -- Server version: 8.0.31
--- PHP Version: 7.4.33
+-- PHP Version: 8.0.26
 
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 START TRANSACTION;
@@ -31,21 +31,29 @@ DROP TABLE IF EXISTS `attributes`;
 CREATE TABLE IF NOT EXISTS `attributes` (
   `id` int NOT NULL AUTO_INCREMENT,
   `date_created` datetime DEFAULT CURRENT_TIMESTAMP,
-  `name` varchar(10) DEFAULT NULL,
+  `name` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
   `description` varchar(200) DEFAULT NULL,
   `status` int DEFAULT NULL,
   `delete_flag` int DEFAULT '0',
+  `type` int DEFAULT NULL,
+  `price` float DEFAULT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=MyISAM AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=MyISAM AUTO_INCREMENT=11 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 --
 -- Dumping data for table `attributes`
 --
 
-INSERT INTO `attributes` (`id`, `date_created`, `name`, `description`, `status`, `delete_flag`) VALUES
-(1, NULL, 'M', 'Size M', 1, 1),
-(2, '2024-05-15 14:07:36', 'L', 'Size L', 1, 0),
-(3, '2024-05-15 14:08:55', 'M', 'Size M', 1, 0);
+INSERT INTO `attributes` (`id`, `date_created`, `name`, `description`, `status`, `delete_flag`, `type`, `price`) VALUES
+(2, '2024-05-15 14:07:36', 'L', 'Size L', 1, 0, 0, 5000),
+(3, '2024-05-15 14:08:55', 'M', 'Size M', 1, 0, 0, 0),
+(4, '2024-05-18 09:51:58', 'Khúc bạch', 'Khúc bạch', 1, 0, 1, 7000),
+(5, '2024-05-18 09:59:04', 'Bánh Flan', 'Bánh Flan', 1, 0, 1, 7000),
+(6, '2024-05-18 09:59:26', 'Trân châu trắng', 'Trân châu trắng', 1, 0, 1, 7000),
+(7, '2024-05-18 09:59:42', 'Kem cheese', 'Kem cheese', 1, 0, 1, 7000),
+(8, '2024-05-18 09:59:55', 'Phô mai tươi', 'Phô mai tươi', 1, 0, 1, 10000),
+(9, '2024-05-18 10:00:08', 'Trân châu đen', 'Trân châu đen', 1, 0, 1, 5000),
+(10, '2024-05-18 10:00:22', 'Kem trứng', 'Kem trứng', 1, 0, 1, 7000);
 
 -- --------------------------------------------------------
 
@@ -58,6 +66,7 @@ CREATE TABLE IF NOT EXISTS `category_list` (
   `id` int NOT NULL AUTO_INCREMENT,
   `name` text NOT NULL,
   `description` text NOT NULL,
+  `has_attribute` int NOT NULL DEFAULT '0',
   `status` tinyint(1) NOT NULL DEFAULT '1',
   `delete_flag` tinyint(1) NOT NULL DEFAULT '0',
   `date_created` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -69,10 +78,10 @@ CREATE TABLE IF NOT EXISTS `category_list` (
 -- Dumping data for table `category_list`
 --
 
-INSERT INTO `category_list` (`id`, `name`, `description`, `status`, `delete_flag`, `date_created`, `date_updated`) VALUES
-(1, 'Cafe', 'Coffee', 1, 0, '2022-04-22 09:59:46', '2024-05-07 20:46:46'),
-(2, 'Trà Sữa', 'Trà Sữa', 1, 0, '2022-04-22 10:01:06', '2024-05-07 20:46:35'),
-(3, 'M', 'Size M', 1, 1, '2024-05-15 13:53:42', '2024-05-15 13:53:52');
+INSERT INTO `category_list` (`id`, `name`, `description`, `has_attribute`, `status`, `delete_flag`, `date_created`, `date_updated`) VALUES
+(1, 'Cafe', 'Coffee', 0, 1, 0, '2022-04-22 09:59:46', '2024-05-07 20:46:46'),
+(2, 'Trà Sữa', 'Trà Sữa', 1, 1, 0, '2022-04-22 10:01:06', '2024-05-15 15:39:01'),
+(3, 'M', 'Size M', 0, 1, 1, '2024-05-15 13:53:42', '2024-05-15 13:53:52');
 
 -- --------------------------------------------------------
 
@@ -112,31 +121,95 @@ CREATE TABLE IF NOT EXISTS `product_list` (
   `name` text NOT NULL,
   `description` text NOT NULL,
   `price` float(15,2) NOT NULL DEFAULT '0.00',
-  `has_attribute` int NOT NULL DEFAULT '0',
+  `upsize` float DEFAULT NULL,
   `status` tinyint(1) NOT NULL DEFAULT '1',
   `delete_flag` tinyint(1) NOT NULL DEFAULT '0',
   `date_created` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `date_updated` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
   KEY `category_id` (`category_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=12 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=15 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 --
 -- Dumping data for table `product_list`
 --
 
-INSERT INTO `product_list` (`id`, `category_id`, `name`, `description`, `price`, `has_attribute`, `status`, `delete_flag`, `date_created`, `date_updated`) VALUES
-(1, 1, 'Arabica', 'Arabica is the most popular type of bean used for coffee. Arabica beans are considered higher quality than Robusta, and they\'re also more expensive.', 150.00, 0, 1, 1, '2022-04-22 10:16:50', '2022-04-22 10:22:07'),
-(2, 1, 'Robusta', 'Robusta beans are typically cheaper to produce because the Robusta plant is easier to grow.', 145.00, 0, 1, 1, '2022-04-22 10:17:20', '2022-04-22 10:22:11'),
-(3, 1, 'Cafe đen', 'Black coffee is made from plain ground coffee beans that are brewed hot. It\'s served without added sugar, milk, or flavorings.', 12000.00, 0, 1, 0, '2022-04-22 10:17:54', '2024-05-07 20:47:16'),
-(4, 1, 'Bạc sỉu', 'Coffee beans naturally contain caffeine, but roasters can use several different processes to remove almost all of it. Decaf coffee is brewed with these decaffeinated beans.', 18000.00, 0, 1, 0, '2022-04-22 10:18:15', '2024-05-07 20:47:41'),
-(5, 1, 'Espresso', 'Most people know that a shot of espresso is stronger than the same amount of coffee, but what\'s the difference, exactly? There isn\'t anything inherently different about the beans themselves, but when beans are used to make espresso they\'re more finely ground, and they\'re brewed with a higher grounds-to-water ratio than what\'s used for coffee.', 125.00, 0, 1, 0, '2022-04-22 10:19:18', '2022-04-22 10:19:18'),
-(6, 1, 'Latte', 'This classic drink is typically 1/3 espresso and 2/3 steamed milk, topped with a thin layer of foam, but coffee shops have come up with seemingly endless customizations. You can experiment with flavored syrups like vanilla and pumpkin spice or create a nondairy version by using oat milk. Skilled baristas often swirl the foam into latte art!', 125.00, 0, 1, 0, '2022-04-22 10:19:47', '2022-04-22 10:19:47'),
-(7, 1, 'Cafe sữa', 'This espresso-based drink is similar to a latte, but the frothy top layer is thicker. The standard ratio is equal parts espresso, steamed milk, and foam. It\'s often served in a 6-ounce cup (smaller than a latte cup) and can be topped with a sprinkling of cinnamon.', 15000.00, 0, 1, 0, '2022-04-22 10:20:06', '2024-05-07 20:47:29'),
-(8, 1, 'Macchiato', 'A macchiato is a shot of espresso with just a touch of steamed milk or foam. In Italian, macchiato means \"stained\" or \"spotted,\" so a caffè macchiato refers to coffee that\'s been stained with milk.', 150.00, 0, 1, 0, '2022-04-22 10:20:26', '2022-04-22 10:20:26'),
-(9, 2, 'Trà sữa Thái', 'Is there anything better than a glass of iced coffee on a hot day (or any day, for that matter)? The simplest way to make it: Brew a regular cup of hot coffee, then cool it over ice. Add whatever milk and sweeteners you like.', 20000.00, 0, 1, 0, '2022-04-22 10:20:53', '2024-05-07 20:48:31'),
-(10, 2, 'Iced Latte', 'The chilled version of a latte is simply espresso and milk over ice.', 145.00, 0, 1, 0, '2022-04-22 10:21:17', '2022-04-22 10:21:17'),
-(11, 2, 'Trà sữa truyền thống', 'Cold brew is one of the biggest coffee trends of the last decade, and for good reason: It\'s made by slowly steeping coffee grounds over cool or room-temperature water, so it tastes smoother and less bitter than regular iced coffee, which is brewed hot.', 0.00, 0, 1, 0, '2022-04-22 10:21:42', '2024-05-15 14:36:34');
+INSERT INTO `product_list` (`id`, `category_id`, `name`, `description`, `price`, `upsize`, `status`, `delete_flag`, `date_created`, `date_updated`) VALUES
+(1, 1, 'Arabica', 'Arabica is the most popular type of bean used for coffee. Arabica beans are considered higher quality than Robusta, and they\'re also more expensive.', 150.00, NULL, 1, 1, '2022-04-22 10:16:50', '2022-04-22 10:22:07'),
+(2, 1, 'Robusta', 'Robusta beans are typically cheaper to produce because the Robusta plant is easier to grow.', 145.00, NULL, 1, 1, '2022-04-22 10:17:20', '2022-04-22 10:22:11'),
+(3, 1, 'Cafe đen', 'Bạc xỉu', 15000.00, NULL, 1, 0, '2022-04-22 10:17:54', '2024-05-18 10:32:44'),
+(4, 1, 'Bạc xỉu', 'Bạc xỉu', 17000.00, NULL, 1, 0, '2022-04-22 10:18:15', '2024-05-18 10:32:27'),
+(5, 1, 'Cacao Sữa', 'Cacao Sữa', 30000.00, NULL, 1, 0, '2022-04-22 10:19:18', '2024-05-18 10:15:13'),
+(6, 1, 'Cafe muối', 'Cafe muối', 20000.00, NULL, 1, 0, '2022-04-22 10:19:47', '2024-05-18 10:32:16'),
+(7, 1, 'Cafe sữa', 'This espresso-based drink is similar to a latte, but the frothy top layer is thicker. The standard ratio is equal parts espresso, steamed milk, and foam. It\'s often served in a 6-ounce cup (smaller than a latte cup) and can be topped with a sprinkling of cinnamon.', 15000.00, NULL, 1, 0, '2022-04-22 10:20:06', '2024-05-07 20:47:29'),
+(8, 2, 'Trà sữa kem Cheese', 'Trà sữa kem Cheese', 25000.00, NULL, 1, 0, '2022-04-22 10:20:26', '2024-05-18 10:35:01'),
+(9, 2, 'Trà thái xanh', 'Trà sữa thái xanh', 20000.00, 1, 1, 0, '2022-04-22 10:20:53', '2024-05-18 10:34:19'),
+(10, 2, 'Hồng trà sữa', 'Hồng trà sữa', 20000.00, 1, 1, 0, '2022-04-22 10:21:17', '2024-05-18 10:33:33'),
+(11, 2, 'Trà sữa kem trứng', 'Trà sữa kem trứng', 25000.00, 1, 1, 0, '2022-04-22 10:21:42', '2024-05-18 10:34:42'),
+(13, 2, 'Trà sữa Đài Loan', 'Trà sữa Đài Loan', 30000.00, 2, 1, 0, '2024-05-18 10:36:32', '2024-05-18 10:36:37'),
+(14, 2, 'Sữa tươi trân châu đường đen', 'Sữa tươi trân châu đường đen', 25000.00, 1, 1, 0, '2024-05-18 10:36:59', '2024-05-18 10:38:25');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `promotion`
+--
+
+DROP TABLE IF EXISTS `promotion`;
+CREATE TABLE IF NOT EXISTS `promotion` (
+  `id` int NOT NULL,
+  `name` varchar(255) DEFAULT NULL,
+  `description` text,
+  `from_date` date DEFAULT NULL,
+  `to_date` date DEFAULT NULL,
+  `product_ids` text,
+  `product_type` varchar(100) DEFAULT NULL,
+  `discount_type` varchar(100) DEFAULT NULL,
+  `discount` float DEFAULT NULL,
+  `buy` int DEFAULT NULL,
+  `gift` int DEFAULT NULL,
+  `min_amount` float DEFAULT NULL,
+  `delete_flag` int NOT NULL DEFAULT '0',
+  `date_created` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `date_updated` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  `updated_by` int DEFAULT NULL
+) ENGINE=MyISAM DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `promotion_code`
+--
+
+DROP TABLE IF EXISTS `promotion_code`;
+CREATE TABLE IF NOT EXISTS `promotion_code` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `code` varchar(100) DEFAULT NULL,
+  `name` varchar(255) DEFAULT NULL,
+  `description` text,
+  `from_date` date DEFAULT NULL,
+  `to_date` date DEFAULT NULL,
+  `type` int DEFAULT NULL,
+  `discount` float DEFAULT NULL,
+  `min_amount` float DEFAULT NULL,
+  `product_type` int DEFAULT NULL,
+  `product_ids` text,
+  `quantity` int DEFAULT NULL,
+  `status` int DEFAULT NULL,
+  `delete_flag` int DEFAULT '0',
+  `date_created` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `date_updated` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  `updated_by` int DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `code` (`code`)
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+--
+-- Dumping data for table `promotion_code`
+--
+
+INSERT INTO `promotion_code` (`id`, `code`, `name`, `description`, `from_date`, `to_date`, `type`, `discount`, `min_amount`, `product_type`, `product_ids`, `quantity`, `status`, `delete_flag`, `date_created`, `date_updated`, `updated_by`) VALUES
+(1, 'HFBGCDEG', 'Mua 1 tặng 1 nhân dịp khai trương', 'Mua 1 tặng 1 nhân dịp khai trương', '2024-05-26', '2024-05-27', 2, 1, 0, NULL, NULL, 1000, 1, 0, '2024-05-20 15:06:17', '2024-05-20 15:09:48', NULL);
 
 -- --------------------------------------------------------
 
@@ -152,23 +225,30 @@ CREATE TABLE IF NOT EXISTS `sale_list` (
   `client_name` text NOT NULL,
   `amount` float(15,2) NOT NULL DEFAULT '0.00',
   `tendered` float(15,2) NOT NULL DEFAULT '0.00',
+  `surplus_amount` float DEFAULT NULL,
+  `no_receive_change` int DEFAULT NULL,
   `payment_type` tinyint(1) NOT NULL COMMENT '1 = Cash,\r\n2 = Debit Card,\r\n3 = Credit Card',
   `payment_code` text,
+  `status` int DEFAULT NULL,
+  `type` int DEFAULT NULL,
+  `total_received` float DEFAULT NULL,
   `date_created` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `date_updated` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
   KEY `user_id` (`user_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=9 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 --
 -- Dumping data for table `sale_list`
 --
 
-INSERT INTO `sale_list` (`id`, `user_id`, `code`, `client_name`, `amount`, `tendered`, `payment_type`, `payment_code`, `date_created`, `date_updated`) VALUES
-(1, 1, '202204220001', 'Guest', 710.00, 1000.00, 1, '', '2022-04-22 13:54:44', '2022-04-22 13:54:44'),
-(2, 2, '202204220002', 'Guest', 675.00, 700.00, 2, '123121ABcdF', '2022-04-22 15:27:02', '2022-04-22 15:27:02'),
-(3, 1, '202405070001', 'Guest', 48000.00, 0.00, 1, '', '2024-05-07 20:50:16', '2024-05-07 20:50:16'),
-(5, 1, '202405140001', 'Guest', 45400.00, 0.00, 1, '', '2024-05-14 15:29:14', '2024-05-14 15:29:14');
+INSERT INTO `sale_list` (`id`, `user_id`, `code`, `client_name`, `amount`, `tendered`, `surplus_amount`, `no_receive_change`, `payment_type`, `payment_code`, `status`, `type`, `total_received`, `date_created`, `date_updated`) VALUES
+(1, 1, '202204220001', 'Guest', 710.00, 1000.00, NULL, NULL, 1, '', NULL, NULL, NULL, '2022-04-22 13:54:44', '2022-04-22 13:54:44'),
+(2, 2, '202204220002', 'Guest', 675.00, 700.00, NULL, NULL, 2, '123121ABcdF', NULL, NULL, NULL, '2022-04-22 15:27:02', '2022-04-22 15:27:02'),
+(3, 1, '202405070001', 'Guest', 48000.00, 0.00, NULL, NULL, 1, '', NULL, NULL, NULL, '2024-05-07 20:50:16', '2024-05-07 20:50:16'),
+(5, 1, '202405140001', 'Guest', 96000.00, 100000.00, NULL, NULL, 1, '', 1, NULL, NULL, '2024-05-14 15:29:14', '2024-05-20 13:37:17'),
+(7, 1, '202405180001', 'Guest', 18000.00, 0.00, NULL, NULL, 1, '', NULL, NULL, NULL, '2024-05-18 08:11:16', '2024-05-18 08:11:16'),
+(8, 1, '202405180002', 'Guest', 15000.00, 0.00, NULL, NULL, 1, '', NULL, NULL, NULL, '2024-05-18 08:30:28', '2024-05-18 08:30:28');
 
 -- --------------------------------------------------------
 
@@ -182,6 +262,7 @@ CREATE TABLE IF NOT EXISTS `sale_products` (
   `product_id` int NOT NULL,
   `qty` int NOT NULL,
   `price` float(15,2) NOT NULL DEFAULT '0.00',
+  `attribute_id` int DEFAULT NULL,
   KEY `sale_id` (`sale_id`),
   KEY `product_id` (`product_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
@@ -190,20 +271,21 @@ CREATE TABLE IF NOT EXISTS `sale_products` (
 -- Dumping data for table `sale_products`
 --
 
-INSERT INTO `sale_products` (`sale_id`, `product_id`, `qty`, `price`) VALUES
-(1, 11, 3, 140.00),
-(1, 10, 2, 145.00),
-(2, 9, 1, 150.00),
-(2, 3, 3, 75.00),
-(2, 8, 2, 150.00),
-(3, 4, 2, 18000.00),
-(3, 3, 1, 12000.00),
-(5, 4, 1, 18000.00),
-(5, 3, 1, 12000.00),
-(5, 7, 1, 15000.00),
-(5, 5, 1, 125.00),
-(5, 8, 1, 150.00),
-(5, 6, 1, 125.00);
+INSERT INTO `sale_products` (`sale_id`, `product_id`, `qty`, `price`, `attribute_id`) VALUES
+(1, 11, 3, 140.00, NULL),
+(1, 10, 2, 145.00, NULL),
+(2, 9, 1, 150.00, NULL),
+(2, 3, 3, 75.00, NULL),
+(2, 8, 2, 150.00, NULL),
+(3, 4, 2, 18000.00, NULL),
+(3, 3, 1, 12000.00, NULL),
+(7, 4, 1, 18000.00, NULL),
+(8, 7, 1, 15000.00, NULL),
+(1, 13, 1, 11.00, NULL),
+(1, 11, 1, 11.00, NULL),
+(5, 4, 3, 18000.00, NULL),
+(5, 3, 1, 12000.00, NULL),
+(5, 7, 2, 15000.00, NULL);
 
 -- --------------------------------------------------------
 
@@ -224,8 +306,8 @@ CREATE TABLE IF NOT EXISTS `system_info` (
 --
 
 INSERT INTO `system_info` (`id`, `meta_field`, `meta_value`) VALUES
-(1, 'name', 'Phần mềm bán hàng'),
-(6, 'short_name', 'SKUN BAKERY - CAFE - MILK TEA'),
+(1, 'name', 'SKUN'),
+(6, 'short_name', 'BAKERY - CAFE - MILK TEA'),
 (11, 'logo', 'uploads/logo.png?v=1650590302'),
 (13, 'user_avatar', 'uploads/user_avatar.jpg'),
 (14, 'cover', 'uploads/cover.png?v=1715094685');

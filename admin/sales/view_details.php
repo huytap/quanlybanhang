@@ -31,49 +31,57 @@ if (isset($_GET['id'])) {
         </div>
         <div class="card-body">
             <div class="container-fluid row justify-content-center">
-                <div class="col-lg-6 col-md-8 col-sm-12 col-xs-12" id="printout">
-                    <div class="d-flex">
-                        <div class="col-auto"><b>Số HĐ:</b></div>
-                        <div class="col-auto ps-1 flex-shrink-1 flex-grow-1 border-bottom border-dark"><?= isset($code) ? $code : "" ?></div>
-                    </div>
-                    <div class="d-flex">
-                        <div class="col-auto"><b>Ngày:</b></div>
-                        <div class="col-auto ps-1 flex-shrink-1 flex-grow-1 border-bottom border-dark"><?= isset($date_created) ? date("Y-m-d h:i A", strtotime($date_created)) : "" ?></div>
-                    </div>
-                    <div class="mb-2"></div>
-                    <h4 class="d-flex border-bottom border-dark">
-                        <div class="col-7 text-center">Món</div>
-                        <div class="col-2 text-center">SL</div>
-                        <div class="col-3 text-center">Thành tiền</div>
-                    </h4>
-                    <?php if (isset($id)) : ?>
-                        <?php
-                        $sp_query = $conn->query("SELECT sp.*, p.name as `product` FROM `sale_products` sp inner join `product_list` p on sp.product_id =p.id where sp.sale_id = '{$id}'");
-                        while ($row = $sp_query->fetch_assoc()) :
-                        ?>
-                            <div class="d-flex border-bottom border-dark">
-                                <div class="col-7" style="line-height:.9em">
-                                    <p class="m-0"><?= $row['product'] ?></p>
-                                    <p class="m-0"><small>x <?= format_num($row['price'], 0) ?></small></p>
+                <div class="col-lg-6 col-md-8 col-sm-12 col-xs-12">
+                    <div id="printout">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="d-flex">
+                                    <div class="col-auto"><b>Số HĐ:</b></div>
+                                    <div class="col-auto ps-1 flex-shrink-1 flex-grow-1 border-dark"><?= isset($code) ? $code : "" ?></div>
                                 </div>
-                                <div class="col-2 text-center"><?= $row['qty'] ?></div>
-                                <div class="col-3 text-right"><?= format_num($row['price'] * $row['qty']) ?></div>
                             </div>
-                        <?php endwhile; ?>
-                    <?php endif; ?>
-                    <h3 class="d-flex border-top border-dark">
-                        <div class="col-4">Tổng tiền</div>
-                        <div class="col-8 text-right"><?= isset($amount) ? format_num($amount, 0) : 0 ?></div>
-                    </h3>
-                    <h5 class="d-flex">
-                        <div class="col-5">Tendered Amount</div>
+                            <div class="col-md-6">
+                                <div class="d-flex">
+                                    <div class="col-auto"><b>Ngày:</b></div>
+                                    <div class="col-auto ps-1 flex-shrink-1 flex-grow-1 border-dark"><?= isset($date_created) ? date("Y-m-d h:i A", strtotime($date_created)) : "" ?></div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="mb-2"></div>
+                        <h6 class="d-flex border-bottom border-dark pb-1">
+                            <div class="col-7">Thực đơn</div>
+                            <div class="col-2 text-center">SL</div>
+                            <div class="col-3 text-center">Thành tiền</div>
+                        </h6>
+                        <?php if (isset($id)) : ?>
+                            <?php
+                            $sp_query = $conn->query("SELECT sp.*, p.name as `product` FROM `sale_products` sp inner join `product_list` p on sp.product_id =p.id where sp.sale_id = '{$id}'");
+                            while ($row = $sp_query->fetch_assoc()) :
+                            ?>
+                                <div class="d-flex border-bottom border-dark mb-1 pb-1">
+                                    <div class="col-7" style="line-height:.9em">
+                                        <p class="m-0"><?= $row['product'] ?></p>
+                                        <p class="m-0"><small>x <?= format_num($row['price'], 0) ?></small></p>
+                                    </div>
+                                    <div class="col-2 text-center"><?= $row['qty'] ?></div>
+                                    <div class="col-3 text-right"><?= format_num($row['price'] * $row['qty']) ?></div>
+                                </div>
+                            <?php endwhile; ?>
+                        <?php endif; ?>
+                        <h6 class="d-flex border-dark">
+                            <div class="col-4">Tổng tiền</div>
+                            <div class="col-8 text-right"><?= isset($amount) ? format_num($amount, 0) : 0 ?></div>
+                        </h6>
+                    </div>
+                    <h6 class="d-flex">
+                        <div class="col-5">Đã nhận</div>
                         <div class="col-7 text-right"><?= isset($tendered) ? format_num($tendered, 0) : 0 ?></div>
-                    </h5>
-                    <h5 class="d-flex">
-                        <div class="col-4">Change</div>
+                    </h6>
+                    <h6 class="d-flex">
+                        <div class="col-4">Tiền thừa</div>
                         <div class="col-8 text-right"><?= isset($amount) && isset($tendered) ? format_num($tendered - $amount, 0) : 0 ?></div>
-                    </h5>
-                    <h5 class="d-flex">
+                    </h6>
+                    <h6 class="d-flex">
                         <div class="col-4">Phương thức thanh toán</div>
                         <div class="col-8 text-right">
                             <?php
@@ -94,24 +102,27 @@ if (isset($_GET['id'])) {
                             }
                             ?>
                         </div>
-                    </h5>
+                    </h6>
                     <?php if ($payment_type > 1) : ?>
-                        <h5 class="d-flex">
-                            <div class="col-4">Payment Code</div>
+                        <h6 class="d-flex">
+                            <div class="col-4">Số tham chiếu</div>
                             <div class="col-8 text-right"><?= isset($payment_code) ? $payment_code : "" ?></div>
-                        </h5>
+                        </h6>
                     <?php endif; ?>
-                    <!-- <div class="d-flex">
-                        <div class="col-auto"><b>Processed By:</b></div>
-                        <div class="col-auto ps-1 flex-shrink-1 flex-grow-1 border-bottom border-dark"><?= isset($user_name) ? ucwords($user_name) : "" ?></div>
-                    </div> -->
                 </div>
             </div>
             <hr>
             <div class="row justify-content-center">
-                <a class="btn btn-primary bg-gradient-primary border col-lg-3 col-md-4 col-sm-12 col-xs-12 rounded-pill" href="./?page=sales/manage_sale&id=<?= isset($id) ? $id : '' ?>"><i class="fa fa-edit"></i> Edit</a>
-                <button class="btn btn-light bg-gradient-light border col-lg-3 col-md-4 col-sm-12 col-xs-12 rounded-pill" id="print"><i class="fa fa-print"></i> Print</button>
-                <button class="btn btn-danger bg-gradient-danger border col-lg-3 col-md-4 col-sm-12 col-xs-12 rounded-pill" id="delete_sale" type="button"><i class="fa fa-trash"></i> Delete sale</button>
+                <?php
+                $today = date('Y-m-d');
+                if($today <= $date_created){?> 
+                    <a class="btn btn-primary bg-gradient-primary border col-lg-3 col-md-4 col-sm-12 col-xs-12 rounded-pill" href="./?page=sales/manage_sale&id=<?= isset($id) ? $id : '' ?>"><i class="fa fa-edit"></i> Chỉnh sửa</a>
+                <?php }?>
+                <button class="btn btn-light bg-gradient-light border col-lg-3 col-md-4 col-sm-12 col-xs-12 rounded-pill" id="print"><i class="fa fa-print"></i> In đơn</button>
+                <?php 
+                if($today <= $date_created){?> 
+                    <button class="btn btn-danger bg-gradient-danger border col-lg-3 col-md-4 col-sm-12 col-xs-12 rounded-pill" id="delete_sale" type="button"><i class="fa fa-trash"></i> Hủy đơn</button>
+                <?php }?>
             </div>
         </div>
     </div>
@@ -124,12 +135,10 @@ if (isset($_GET['id'])) {
             min-height: unset !important
         }
     </style>
-    <div class="d-flex w-100">
-        <div class="col-2 text-center">
-        </div>
-        <div class="col-8 text-center">
+    <div class="d-flex">
+        <div class="col-12 text-center">
             <h4 class="tex-center"><?= $_settings->info('name') ?></h4>
-            <h3 class="text-center"><b>Sales Invoice</b></h3>
+            <p class="tex-center mb-0"><?= $_settings->info('short_name') ?></p>
         </div>
     </div>
     <hr>
@@ -155,7 +164,7 @@ if (isset($_GET['id'])) {
             el.find('tr.bg-gradient-navy').attr('style', "color:#000")
             el.find('tr.bg-gradient-secondary').attr('style', "color:#000")
             start_loader();
-            var nw = window.open("", "_blank", "width=1000, height=900")
+            var nw = window.open("", "_blank", "width=279")
             nw.document.querySelector('head').innerHTML = head.prop('outerHTML')
             nw.document.querySelector('body').innerHTML = el.prop('outerHTML')
             nw.document.close()
@@ -168,7 +177,7 @@ if (isset($_GET['id'])) {
             }, 500)
         })
         $('#delete_sale').click(function() {
-            _conf("Are you sure to delete this sale permanently?", "delete_sale", [])
+            _conf("Bạn có chắc chắn muốn hủy đơn này không?", "delete_sale", [])
         })
     })
 

@@ -18,6 +18,24 @@ if (isset($_GET['id']) && $_GET['id'] > 0) {
 			<input type="text" name="name" id="name" class="form-control form-control-sm rounded-0" value="<?php echo isset($name) ? $name : ''; ?>" required />
 		</div>
 		<div class="form-group">
+			<label for="name" class="control-label">Tên</label>
+			<select name="type" class="form-control form-control">
+				<?php
+				foreach(ATTR as $key => $attr){
+					if($key == $type){
+						echo '<option selected="selected" value="'.$key.'">'.$attr.'</option>';
+					}else{
+						echo '<option value="'.$key.'">'.$attr.'</option>';
+					}
+				} 
+				?>
+			</select>
+		</div>
+		<div class="form-group">
+			<label for="name" class="control-label">Giá</label>
+			<input type="text" name="price" id="price" class="form-control form-control-sm rounded-0" value="<?php echo isset($price) ? $price : ''; ?>" required />
+		</div>
+		<div class="form-group">
 			<label for="description" class="control-label">Mô tả</label>
 			<textarea type="text" name="description" id="description" class="form-control form-control-sm rounded-0" required><?php echo isset($description) ? $description : ''; ?></textarea>
 		</div>

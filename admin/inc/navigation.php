@@ -71,13 +71,29 @@
                   <a href="<?php echo base_url ?>admin/?page=products" class="nav-link nav-products">
                     <i class="nav-icon fas fa-mug-hot"></i>
                     <p>
-                      Danh sách món
+                      Thực đơn
+                    </p>
+                  </a>
+                </li>
+                <li class="nav-item dropdown">
+                  <a href="<?php echo base_url ?>admin/?page=promotion" class="nav-link nav-discount">
+                    <i class="nav-icon fas fa-gift"></i>
+                    <p>
+                      Chương trình KM
+                    </p>
+                  </a>
+                </li>
+                <li class="nav-item dropdown">
+                  <a href="<?php echo base_url ?>admin/?page=promotion_code" class="nav-link nav-discount">
+                    <i class="nav-icon fas fa-gift"></i>
+                    <p>
+                      Mã giảm
                     </p>
                   </a>
                 </li>
                 <li class="nav-item dropdown">
                   <a href="<?php echo base_url ?>admin/?page=attributes" class="nav-link nav-attributes">
-                    <i class="nav-icon fas fa-th-list"></i>
+                    <i class="nav-icon fas fa-tags"></i>
                     <p>
                       Thuộc tính
                     </p>
