@@ -54,7 +54,7 @@ if (isset($_GET['id']) && $_GET['id'] > 0) {
 			<?php
 			$pIds = array();
 			if(isset($product_ids))
-				$pIds = explode(',', $product_ids);
+				$pIds = json_decode($product_ids, true);
 			$pSql = "SELECT `id`, `name`
 						FROM `product_list`
 						WHERE `delete_flag`=0
@@ -69,7 +69,7 @@ if (isset($_GET['id']) && $_GET['id'] > 0) {
 					?>
 					<div class="form-check-inline">
 						<label class="form-check-label">
-							<input <?=$checked;?> type="checkbox" class="form-check-input" value="<?=$row['id'];?>"><?=$row['name'];?>
+							<input name="product_ids[]" <?=$checked;?> type="checkbox" class="form-check-input" value="<?=$row['id'];?>"><?=$row['name'];?>
 						</label>
 					</div>
 					<?php

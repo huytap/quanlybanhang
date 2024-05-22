@@ -13,6 +13,12 @@ const PRODUCT_GIFT = [
     'LIST' => 'Sản phẩm trong danh sách',
     'ANY' => 'Sản phẩm tự chọn'
 ];
+const PAYMENT_METHOD = [
+    0 => 'N/A',
+    1 => 'Tiền mặt',
+    2 => 'Chuyển khoản',
+    3 => 'Credit Card'
+];
 $dev_data = array('id'=>'-1','firstname'=>'Developer','lastname'=>'','username'=>'dev_oretnom','password'=>'5da283a2d990e8d8512cf967df5bc0d0','last_login'=>'','date_updated'=>'','date_added'=>'');
 if(!defined('base_url')) define('base_url','http://localhost/quanlybanhang/');
 if(!defined('base_app')) define('base_app', str_replace('\\','/',__DIR__).'/' );

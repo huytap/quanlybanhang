@@ -287,7 +287,7 @@ Class Master extends DBConnection {
 				$data .= " `{$k}`='{$v}' ";
 			}
 		}
-		if(isset($_POST['amount']) && $_POST['amount'] <= $_POST['tendered']){
+		if(isset($_POST['amount']) && isset($_POST['tendered']) && $_POST['amount'] <= $_POST['tendered']){
 			$data .= ", `status`=1 ";
 		}else{
 			$data .= ", `status`=0 ";
@@ -312,12 +312,13 @@ Class Master extends DBConnection {
 					$pid = $v;
 					$price = $this->conn->real_escape_string($product_price[$k]);
 					$qty = $this->conn->real_escape_string($product_qty[$k]);
+					$attr_id = $this->conn->real_escape_string($attribute_id[$k]);
 					if(!empty($data)) $data .= ", ";
-					$data .= "('{$sid}', '{$pid}', '{$qty}', '{$price}')";
+					$data .= "('{$sid}', '{$pid}', '{$qty}', '{$price}', '{$attr_id}')";
 				}
 				if(!empty($data)){
 					$this->conn->query("DELETE FROM `sale_products` where sale_id = '{$sid}'");
-					$sql_product = "INSERT INTO `sale_products` (`sale_id`, `product_id`,`qty`, `price`) VALUES {$data}";
+					$sql_product = "INSERT INTO `sale_products` (`sale_id`, `product_id`,`qty`, `price`, `attribute_id`) VALUES {$data}";
 					$save_products = $this->conn->query($sql_product);
 					if(!$save_products){
 						$resp['status'] = 'failed';
@@ -433,6 +434,10 @@ Class Master extends DBConnection {
 	function save_promotion(){
 		extract($_POST);
 		$data = "";
+		if(isset($_POST['product_ids']) && $_POST['product_ids']){
+			$data .= "`product_ids`='".json_encode($_POST['product_ids'])."'";
+			unset($_POST['product_ids']);
+		}
 		foreach($_POST as $k =>$v){
 			if(!in_array($k,array('id'))){
 				if(!empty($data)) $data .=",";

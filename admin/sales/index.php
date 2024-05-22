@@ -37,9 +37,9 @@
 						<?php
 						$i = 1;
 						if ($_settings->userdata('type') == 3) :
-							$qry = $conn->query("SELECT * FROM `sale_list` where user_id = '{$_settings->userdata('id')}' order by `status`, unix_timestamp(date_updated) desc ");
+							$qry = $conn->query("SELECT * FROM `sale_list` where user_id = '{$_settings->userdata('id')}' order by unix_timestamp(date_updated) desc ");
 						else :
-							$qry = $conn->query("SELECT * FROM `sale_list` order by `status`, unix_timestamp(date_updated) desc ");
+							$qry = $conn->query("SELECT * FROM `sale_list` order by date_updated desc ");
 						endif;
 						while ($row = $qry->fetch_assoc()) :
 						?>

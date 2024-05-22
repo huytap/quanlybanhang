@@ -55,12 +55,37 @@ if (isset($_GET['id'])) {
                         </h6>
                         <?php if (isset($id)) : ?>
                             <?php
-                            $sp_query = $conn->query("SELECT sp.*, p.name as `product` FROM `sale_products` sp inner join `product_list` p on sp.product_id =p.id where sp.sale_id = '{$id}'");
+                            $sql = "SELECT sp.*, pr.name as pr_name, p.name as `product`, s.promotion_id, attribute_id
+                                FROM `sale_products` sp 
+                                left join `sale_list` s on s.id=sp.sale_id
+                                inner join `product_list` p on sp.product_id =p.id 
+                                left join `promotion` pr on pr.id=s.promotion_id
+                                where sp.sale_id = '{$id}'";
+                            $sp_query = $conn->query($sql);
+                            $promotion_name = '';
+                            //$sp_query = $conn->query("SELECT sp.*, p.name as `product` FROM `sale_products` sp inner join `product_list` p on sp.product_id =p.id where sp.sale_id = '{$id}'");
                             while ($row = $sp_query->fetch_assoc()) :
+                                $promotion_name = $row['pr_name'];
                             ?>
                                 <div class="d-flex border-bottom border-dark mb-1 pb-1">
                                     <div class="col-7" style="line-height:.9em">
                                         <p class="m-0"><?= $row['product'] ?></p>
+                                        <?php 
+                                        if($row['attribute_id'] != ''){
+                                            echo '<i style="display:block;font-size:11px;" class="attribute_name">';
+                                            $attr_query = "SELECT `name` FROM `attributes` where id in({$row['attribute_id']}) AND delete_flag=0";
+                                            $q = $conn->query($attr_query);
+                                            $r = 0;
+                                            while ($row2 = $q->fetch_assoc()) :
+                                                echo $row2['name'];
+                                                if($r < $q->num_rows - 1){
+                                                    echo ', ';
+                                                }
+                                                $r++;
+                                            endwhile; 
+                                            echo  '</i>';
+                                        }
+                                        ?>
                                         <p class="m-0"><small>x <?= format_num($row['price'], 0) ?></small></p>
                                     </div>
                                     <div class="col-2 text-center"><?= $row['qty'] ?></div>
@@ -72,55 +97,99 @@ if (isset($_GET['id'])) {
                             <div class="col-4">Tổng tiền</div>
                             <div class="col-8 text-right"><?= isset($amount) ? format_num($amount, 0) : 0 ?></div>
                         </h6>
-                    </div>
-                    <h6 class="d-flex">
-                        <div class="col-5">Đã nhận</div>
-                        <div class="col-7 text-right"><?= isset($tendered) ? format_num($tendered, 0) : 0 ?></div>
-                    </h6>
-                    <h6 class="d-flex">
-                        <div class="col-4">Tiền thừa</div>
-                        <div class="col-8 text-right"><?= isset($amount) && isset($tendered) ? format_num($tendered - $amount, 0) : 0 ?></div>
-                    </h6>
-                    <h6 class="d-flex">
-                        <div class="col-4">Phương thức thanh toán</div>
-                        <div class="col-8 text-right">
-                            <?php
-                            $payment_type = isset($payment_type) ? $payment_type : 0;
-                            switch ($payment_type) {
-                                case 1:
-                                    echo "Tiền mặt";
-                                    break;
-                                case 2:
-                                    echo "Chuyển khoản";
-                                    break;
-                                case 3:
-                                    echo "Credit Card";
-                                    break;
-                                default:
-                                    echo "N/A";
-                                    break;
-                            }
-                            ?>
+                        <?php if($status == '1'){?>
+                            <div class="d-flex">
+                                <div class="col-5">Đã nhận</div>
+                                <div class="col-7 text-right"><?= isset($tendered) ? format_num($tendered, 0) : 0 ?></div>
+                            </div>
+                            <div class="d-flex">
+                                <div class="col-4">Tiền thừa</div>
+                                <div class="col-8 text-right"><?= isset($amount) && isset($tendered) ? format_num($tendered - $amount, 0) : 0 ?></div>
+                            </div>
+                            <div class="d-flex">
+                                <div class="col-4">Hình thức TT</div>
+                                <div class="col-8 text-right">
+                                    <?php
+                                    $payment_type = isset($payment_type) ? $payment_type : 0;
+                                    echo PAYMENT_METHOD[$payment_type];
+                                    ?>
+                                </div>
+                            </div>
+                            <?php if ($payment_type > 1) : ?>
+                                <h6 class="d-flex">
+                                    <div class="col-4">Số tham chiếu</div>
+                                    <div class="col-8 text-right"><?= isset($payment_code) ? $payment_code : "" ?></div>
+                                </h6>
+                            <?php endif; ?>
+                        <?php }?>
+                        <?php if($promotion_name):?>
+                            <div id="notes" class="d-flex font-italic">
+                                <div class="col-4">Ghi chú:</div>
+                                <div class="col-8 text-right"><?php echo $promotion_name;?></div>
+                            </div>
+                        <?php endif;?>
+                        <div class="d-flex border-dark mb-2">
+                            <div class="col-4">Trạng thái:</div>
+                            <div class="col-8 text-right">
+                                <?php 
+                                    if($status != '1'){
+                                        echo '<span class="btn btn-warning">Chưa thanh toán</span>';
+                                    }else{
+                                        echo '<span class="btn btn-primary">Đã thanh toán</span>';
+                                    }?>
+                            </div>
                         </div>
-                    </h6>
-                    <?php if ($payment_type > 1) : ?>
-                        <h6 class="d-flex">
-                            <div class="col-4">Số tham chiếu</div>
-                            <div class="col-8 text-right"><?= isset($payment_code) ? $payment_code : "" ?></div>
-                        </h6>
-                    <?php endif; ?>
+                        
+                    </div>
+                    <?php if($status != '1'){?>
+                        <form method="post" id="sale-form">
+                            <input type="hidden" name="id" value="<?= isset($id) ? $id : '' ?>">
+                            <input type="hidden" name="amount" value="<?= isset($amount) ? $amount : 0 ?>">
+                            <div class="d-flex w-100 align-items-center">
+                                <div class="col-4">Đã nhận:</div>
+                                <div class="col-8">
+                                    <input type="text" pattern="[0-9\.]*$" class="form-control form-control-lg rounded-0 text-right" id="tendered" name="tendered" value="<?= isset($tendered) ? number_format($tendered): '0' ?>" required />
+                                </div>
+                            </div>
+                            <div class="d-flex w-100 align-items-center">
+                                <div class="col-4">Tiền thừa:</div>
+                                <div class="col-8">
+                                    <input type="text" pattern="[0-9\.]*$" class="form-control form-control-lg rounded-0 text-right" id="change" value="<?= isset($amount) && isset($tendered) ? format_num($tendered - $amount, 0) : '0' ?>" readonly />
+                                </div>
+                            </div>
+                            <div class="d-flex w-100 align-items-center">
+                                <div class="col-4">Phương thức thanh toán:</div>
+                                <div class="col-8">
+                                    <select name="payment_type" id="payment_type" class="form-control rounded-0" required="required">
+                                        <?php 
+                                        foreach(PAYMENT_METHOD as $k => $p){    
+                                            echo '<option value="'.$k.'"'.(isset($payment_type) && $payment_type == 1 ? "selected" : "").'>'. $p. '</option>';
+                                        }?>
+                                    </select>
+                                </div>
+                            </div>
+                            <div id="no_receive_change" style="display: <?php if(isset($tendered) && $tendered > 0) echo 'block';else echo 'none';?>">
+                                <input type="text" id="payment_code" class="form-control form-control-sm rounded-0 d-none" name="payment_code" value="<?= isset($payment_code) ? $payment_code : "" ?>" placeholder="Số tham chiếu">
+                                <input type="checkbox" name="" id=""> Không lấy tiền thừa
+                            </div>
+                            <div class="col-12 mt-3 text-right">
+                                <button type="submit" class="btn btn-primary">Xác nhận</button>
+                            </div>
+                        </form>
+                    <?php
+                    }?>
                 </div>
             </div>
             <hr>
             <div class="row justify-content-center">
                 <?php
                 $today = date('Y-m-d');
-                if($today <= $date_created){?> 
+                if($today <= $date_created && $status != '1'){?> 
                     <a class="btn btn-primary bg-gradient-primary border col-lg-3 col-md-4 col-sm-12 col-xs-12 rounded-pill" href="./?page=sales/manage_sale&id=<?= isset($id) ? $id : '' ?>"><i class="fa fa-edit"></i> Chỉnh sửa</a>
                 <?php }?>
                 <button class="btn btn-light bg-gradient-light border col-lg-3 col-md-4 col-sm-12 col-xs-12 rounded-pill" id="print"><i class="fa fa-print"></i> In đơn</button>
                 <?php 
-                if($today <= $date_created){?> 
+                if($today <= $date_created && $status != '1'){?> 
                     <button class="btn btn-danger bg-gradient-danger border col-lg-3 col-md-4 col-sm-12 col-xs-12 rounded-pill" id="delete_sale" type="button"><i class="fa fa-trash"></i> Hủy đơn</button>
                 <?php }?>
             </div>
@@ -205,4 +274,56 @@ if (isset($_GET['id'])) {
             }
         })
     }
+    $('#tendered').on('input', function() {
+        calc_change()
+    })
+    function calc_change() {
+        var amount = $('[name="amount"]').val()
+        var tendered = $('[name="tendered"]').val()
+        amount = amount > 0 ? amount : 0;
+        tendered = tendered > 0 ? tendered : 0;
+        var change = parseFloat(tendered) - parseFloat(amount)
+        if(change> 0){
+            $('#no_receive_change').show()
+        }else{
+            $('#no_receive_change').hide()
+        }
+        $('#change').val(parseFloat(change).toLocaleString('en-US'))
+    }
+        $('#sale-form').submit(function(e) {
+            e.preventDefault();
+            var _this = $(this)
+            $('.err-msg').remove();
+            start_loader();
+            $.ajax({
+                url: _base_url_ + "classes/Master.php?f=save_sale",
+                data: new FormData($(this)[0]),
+                cache: false,
+                contentType: false,
+                processData: false,
+                method: 'POST',
+                type: 'POST',
+                dataType: 'json',
+                error: err => {
+                    console.log(err)
+                    alert_toast("An error occured", 'error');
+                    end_loader();
+                },
+                success: function(resp) {
+                    if (typeof resp == 'object' && resp.status == 'success') {
+                        location.href = "./?page=sales/view_details&id=" + resp.sid
+                    } else if (resp.status == 'failed' && !!resp.msg) {
+                        var el = $('<div>')
+                        el.addClass("alert alert-danger err-msg").text(resp.msg)
+                        _this.prepend(el)
+                        el.show('slow')
+                        $("html, body,.modal").scrollTop(0);
+                        end_loader()
+                    } else {
+                        alert_toast("An error occured", 'error');
+                        end_loader();
+                    }
+                }
+            })
+        })
 </script>

@@ -55,11 +55,26 @@
 							<td><?php echo $row['from_date'] ?> - <?php echo $row['to_date'] ?></td>
 							<td class="text-right">
 								<?php 
-								if(isset(PROMOTION_TYPE[$row['type']]))
-									echo PROMOTION_TYPE[$row['type']];
+								if(isset(PROMOTION_TYPE[$row['discount_type']]))
+									echo PROMOTION_TYPE[$row['discount_type']];
 								?>
 							</td>
-							<td class="text-center"><?php echo $row['discount'];?></td>
+							<td class="text-center">
+								<?php 
+								if($row['discount_type'] != 'PRODUCT'){
+									echo $row['discount'];
+								}else{
+									echo 'Mua '. $row['buy'] . ' tặng ' .$row['gift'];
+									if($row['product_type'] == 'SAME'){
+										echo ' sản phẩm cùng loại';
+									}else if($row['product_type'] == 'ANY'){
+										echo ' sản phẩm tự chọn';
+									}else if($row['product_type'] == 'LIST'){
+										echo ' sản phẩm trong dách sách';
+									}
+								} 
+								?>
+							</td>
 							<td class="text-center">
 								<?php if ($row['status'] == 1) : ?>
 									<span class="badge badge-success px-3 rounded-pill">Hoạt động</span>

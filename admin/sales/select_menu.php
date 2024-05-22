@@ -58,10 +58,14 @@ if (isset($_GET['id']) && $_GET['id'] > 0) {
     $('.chose-size').change(function(){
         $('.chose-size').not(this).prop('checked', false);
     })
+    var arrAttr = [$('.bg-info').next().find('.chose-size').val()]
+    var attrName = [$('.bg-info').next().find('.chose-size').attr('data-name')]
+    $('#productAttrId').val(arrAttr.join(','))
+    $('#attrName').val(attrName.join(','))
     $('.checkbox').change(function(){
         var total = 0;
-        var arrAttr = []
-        var attrName = []
+        arrAttr = []
+        attrName = []
         $('.checkbox').each(function(a, cb){
             var v = $(cb).val()
             if(cb.checked){

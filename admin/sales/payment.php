@@ -42,14 +42,8 @@ if (isset($_GET['id'])) {
     .quantity .btn-plus{
         right: 0;
     }
-    .btn-minus{
-        left: 0;
-    }
-    .btn-plus{
-        right:0;
-    }
 </style>
-<div class="content">
+<div class="content py-3">
     <div class="container-fluid">
         <div class="card card-outline card-outline rounded-0 shadow blur">
             <div class="card-header">
@@ -60,48 +54,11 @@ if (isset($_GET['id'])) {
                     <form action="" id="sale-form">
                         <input type="hidden" name="id" value="<?= isset($id) ? $id : '' ?>">
                         <input type="hidden" name="amount" value="<?= isset($amount) ? $amount : '' ?>">
-                        <div class="row">                            
-                        <?php 
-                        $today = date('Y-m-d');
-                        $sqlPromo = "SELECT * 
-                            FROM `promotion` 
-                            WHERE delete_flag = 0 and `status` = 1 and `from_date`<='{$today}' and `to_date`>='{$today}'
-                            order by `from_date` asc";
-                        $promotion = $conn->query($sqlPromo);
-                        $promotion_name = '';
-                        $promotion_id = 0;
-                        if($promotion->num_rows){?>
-                            <div class="w-100 mt-2 d-flex">
-                                <div class="col-12">
-                                    <label for="client_name" class="control-label">Chương trình KM đang được áp dụng: </label>
-                                    <span class="text-red">
-                                    <?php                                         
-                                        while ($row = $promotion->fetch_assoc()) {
-                                            if($row['discount_type'] == 'PRODUCT'){
-                                            ?>
-                                                <input data='<?=json_encode($row);?>' type="hidden" product_type="<?=$row['product_type'];?>" 
-                                                name="promotion_id" class="promo" id="promotion_id" 
-                                                value="<?=$row['id'];?>"
-                                                > 
-                                                <label for="promotion_id"><?php echo $row['name'];?></label>
-                                            <?php 
-                                            }
-                                        }
-                                    ?>
-                                    </span>
-                                </div>
-                            </div>
-                        <?php }?>
-                            <div class="col-lg-6 col-md-6 col-sm-6 col-xs-12">
+                        <div class="row">
+                            <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
                                 <div class="form-group mb-3">
                                     <label for="client_name" class="control-label">Khách hàng</label>
                                     <input type="text" placeholder="" name="client_name" id="client_name" class="form-control form-control-sm rounded-0" value="<?= isset($client_name) ? $client_name : "Guest" ?>" required="required">
-                                </div>
-                            </div>
-                            <div class="col-lg-6 col-md-6 col-sm-6 col-xs-12">
-                                <div class="form-group mb-3">
-                                    <label for="phone_number" class="control-label">SĐT</label>
-                                    <input type="text" placeholder="" name="phone_number" id="client_name" class="form-control form-control-sm rounded-0">
                                 </div>
                             </div>
                         </div>
@@ -166,7 +123,7 @@ if (isset($_GET['id'])) {
                                         <!-- /.card -->
                                     </div>
                                 </div>
-                                <div class="col-4 h-60">
+                                <div class="col-4 h-100">
                                     <table class="table table-bordered table-striped mb-0">
                                         <colgroup>
                                             <col width="35%">
@@ -197,82 +154,47 @@ if (isset($_GET['id'])) {
                                             <tbody>
                                                 <?php if (isset($id)) : ?>
                                                     <?php
-                                                    $sql = "SELECT sp.*, pr.name as pr_name, p.name as `product`, s.promotion_id, a.name as `atrribute`
+                                                    $sql = "SELECT sp.*, p.name as `product`, a.name as `atrribute`
                                                         FROM `sale_products` sp 
-                                                        left join `sale_list` s on s.id=sp.sale_id
                                                         inner join `product_list` p on sp.product_id =p.id 
                                                         left join `attributes` a on a.id=sp.attribute_id
-                                                        left join `promotion` pr on pr.id=s.promotion_id
                                                         where sp.sale_id = '{$id}'";
                                                     $sp_query = $conn->query($sql);
                                                     while ($row = $sp_query->fetch_assoc()) :
-                                                        $promotion_name = $row['pr_name'];
                                                     ?>
-                                                        <tr <?php if($row['promotion_id']>0 && $row['price'] <= 0) echo 'promotion="true"';?>>
+                                                        <tr>
                                                             <td class="px-2 py-1 align-middle" style="line-height:.9em">
                                                                 <p class="product_name m-0 truncate-1"><?= $row['product'] ?></p>
-                                                                <?php
-                                                                if($row['attribute_id'] != ''){
-                                                                    echo '<i style="display:block;font-size:11px;" class="attribute_name">';
-                                                                    $attr_query = "SELECT `name` FROM `attributes` where id in({$row['attribute_id']}) AND delete_flag=0";
-                                                                    $q = $conn->query($attr_query);
-                                                                    $r = 0;
-                                                                    while ($row2 = $q->fetch_assoc()) :
-                                                                        echo $row2['name'];
-                                                                        if($r < $q->num_rows - 1){
-                                                                            echo ', ';
-                                                                        }
-                                                                        $r++;
-                                                                    endwhile; 
-                                                                    echo  '</i>';
-                                                                } 
-                                                                ?>
                                                                 <p class="m-0"><small class="product_price">x <?= format_num($row['price']) ?></small></p>
                                                             </td>
                                                             <td class="px-2 py-1 align-middle">
                                                                 <input type="hidden" name="product_id[]" value="<?= $row['product_id'] ?>">
                                                                 <input type="hidden" name="product_price[]" value="<?= $row['price'] ?>">
-                                                                <input type="hidden" name="attribute_id[]" value="<?= $row['attribute_id'] ?>">
-                                                                <div class="quantity text-center">
-                                                                <?php if($row['promotion_id']>0 && $row['price'] <= 0){
-                                                                        echo '<span>'.$row['qty'].'</span>';
-                                                                        echo '<input type="hidden" class="form-control form-control-sm rounded-0 text-center" min="0" name="product_qty[]" value="'.$row['qty'].'" required>';
-                                                                    }else{?>
-                                                                        <button type="button" class="btn btn-primary btn-minus"> 
-                                                                            <span class="fa fa-minus"></span>
-                                                                        </button>
-                                                                        <input style="padding-left: 20px;" type="number" class="form-control form-control-sm rounded-0 text-center" min="0" name="product_qty[]" value="<?= $row['qty'] ?>" required>
-                                                                        <button type="button" class="btn btn-primary btn-plus"> 
-                                                                            <span class="fa fa-plus"></span>
-                                                                        </button>
-                                                                        <?php }?>
+                                                                <div class="quantity">
+                                                                    <button type="button" class="btn btn-primary btn-minus"> 
+                                                                        <span class="fa fa-minus"></span>
+                                                                    </button>
+                                                                    <input style="padding-left: 20px;" type="number" class="form-control form-control-sm rounded-0 text-center" min="0" name="product_qty[]" value="<?= $row['qty'] ?>" required>
+                                                                    <button type="button" class="btn btn-primary btn-plus"> 
+                                                                        <span class="fa fa-plus"></span>
+                                                                    </button>
                                                                 </div>
                                                             </td>
                                                             <td class="px-2 py-1 align-middle text-right product_total">
                                                                 <?= format_num($row['price'] * $row['qty']) ?>
                                                             </td>
-                                                            <td class="px-2 py-1 align-middle text-center">
-                                                                <?php 
-                                                                if($row['price']>0){?>
-                                                                    <button class="btn btn-outline-danger border-0 btn-sm rounded-0 rem-product p-1" type="button"><i class="fa fa-times"></i></button>
-                                                                <?php }?>
-                                                            </td>
+                                                            <td class="px-2 py-1 align-middle text-center"><button class="btn btn-outline-danger border-0 btn-sm rounded-0 rem-product p-1" type="button"><i class="fa fa-times"></i></button></td>
                                                         </tr>
                                                     <?php endwhile; ?>
                                                 <?php endif; ?>
                                             </tbody>
                                         </table>
                                     </div>
-                                    <div id="notes" class="<?php if(!$promotion_name) echo 'd-none';?>">
-                                        <div class="alert alert-danger ">
-                                            <?php echo $promotion_name;?>
-                                        </div>
-                                    </div>
-                                    <div class="text-light w-100 mt-1 d-flex" id="summary">
+                                    <div class="text-light w-100 d-flex">
                                         <div class="col-auto">Tổng tiền:</div>
                                         <div class="col-auto flex-shrink-1 flex-grow-1 truncate-1 text-right" id="amount"><?= isset($amount) ? format_num($amount, 0) : '0.00' ?></div>
                                     </div>
-                                    <!-- <div class="d-flex w-100 align-items-center">
+                                    <div class="d-flex w-100 align-items-center">
                                         <div class="col-4">Đã nhận:</div>
                                         <div class="col-8">
                                             <input type="text" pattern="[0-9\.]*$" class="form-control form-control-lg rounded-0 text-right" id="tendered" name="tendered" value="<?= isset($tendered) ? str_replace(",", "", number_format($tendered)) : '0' ?>" required />
@@ -297,7 +219,7 @@ if (isset($_GET['id'])) {
                                     <div id="no_receive_change" style="display: <?php if(isset($tendered) && $tendered > 0) echo 'block';else echo 'none';?>">
                                         <input type="text" id="payment_code" class="form-control form-control-sm rounded-0 d-none" name="payment_code" value="<?= isset($payment_code) ? $payment_code : "" ?>" placeholder="Số tham chiếu">
                                         <input type="checkbox" name="" id=""> Không lấy tiền thừa
-                                    </div> -->
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -305,7 +227,7 @@ if (isset($_GET['id'])) {
                 </div>
             </div>
             <div class="card-footer py-2 text-right">
-                <!-- <button class="btn btn-primary rounded-0" form="sale-form">Lưu tạm</button> -->
+                <button class="btn btn-primary rounded-0" form="sale-form">Lưu tạm</button>
                 <button class="btn btn-primary rounded-0" form="sale-form">Lưu & Thanh toán</button>
                 <?php if (!isset($id)) : ?>
                     <a class="btn btn-default border rounded-0" href="./?page=sales">Hủy</a>
@@ -320,16 +242,15 @@ if (isset($_GET['id'])) {
     <tr>
         <td class="px-2 py-1 align-middle" style="line-height:.9em">
             <p class="m-0 truncate-1">
-                <span class="product_name">Cafe</span>
+                <span class="product_name">Product 101</span>
             </p>
             <i style="display:block;font-size:11px;" class="attribute_name"></i>
-            <p class="m-0"><small class="product_price">x 20,000đ</small></p>
+            <p class="m-0"><small class="product_price">x 123.00</small></p>
         </td>
         <td class="px-2 py-1 align-middle">
             <input type="hidden" name="product_id[]">
             <input type="hidden" name="product_price[]">
-            <input type="hidden" name="attribute_id[]">
-            <div class="quantity text-center">
+            <div class="quantity">
                 <button type="button" class="btn btn-primary btn-minus"> 
                     <span class="fa fa-minus"></span>
                 </button>
@@ -393,48 +314,75 @@ if (isset($_GET['id'])) {
         })
         $('#product-list tbody tr').each(function(i, tr) {
             $(tr).find('.rem-product').click(function(){
-                if (confirm("Bạn có chắc chăn muốn xóa món " + ($(tr).find('.product_name').text()) + " không?") === true) {
-                    if($(tr).next().attr('promotion') == 'true'){
-                        $(tr).next().remove()
-                    }
+                if (confirm("Bạn có chắc chăn muốn xóa món " + (tr.find('.product_name').text()) + " không?") === true) {
                     $(tr).remove()
                     calc_product()
                 }
             })
+            
             $(tr).find('.btn-plus').click(function(){
-                changeQty(tr, 'plus')
+                var price = $(tr).find('[name="product_price[]"]').val()
+                var qty = parseFloat($(this).parent().find('[name="product_qty[]"]').val())
+                qty += 1
+                $(this).parent().find('[name="product_qty[]"]').val(qty)
+                var total = parseFloat(qty) * parseFloat(price)
+                $(tr).find('.product_total').text(parseFloat(total).toLocaleString())
+                calc_product()
             })
             $(tr).find('.btn-minus').click(function(){
-                changeQty(tr, 'minus')
+                var price = $(tr).find('[name="product_price[]"]').val()
+                var qty = parseFloat($(this).parent().find('[name="product_qty[]"]').val())
+                qty -= 1
+                if(qty < 0){
+                    qty = 0;
+                }
+                $(this).parent().find('[name="product_qty[]"]').val(qty)
+                var total = parseFloat(qty) * parseFloat(price)
+                $(tr).find('.product_total').text(parseFloat(total).toLocaleString())
+                calc_product()
             })
             $(tr).find('[name="product_qty[]"]').on('input change', function() {
-                changeQty(tr, 'change')
+                var price = $(tr).find('[name="product_price[]"]').val()
+                var qty = $(this).val()
+                qty = qty > 0 ? qty : 0
+                price = price > 0 ? price : 0
+                var total = parseFloat(qty) * parseFloat(price)
+                $(tr).find('.product_total').text(parseFloat(total).toLocaleString())
+                calc_product()
             })
         })
+        // $('#product-list tbody tr').find('[name="product_qty[]"]').on('input change', function() {
+        //     var tr = $(this).closest('tr')
+        //     var price = tr.find('[name="product_price[]"]').val()
+        //     var qty = $(this).val()
+        //     qty = qty > 0 ? qty : 0
+        //     price = price > 0 ? price : 0
+        //     var total = parseFloat(qty) * parseFloat(price)
+        //     tr.find('.product_total').text(parseFloat(total).toLocaleString())
+        //     calc_product()
+
+        // })
         $('#tendered').on('input', function() {
             calc_change()
         })
         $('#submit').click(function(){
             $('#uni_modal').modal('hide')
-            var id = $('#productId').val()
+            var id = $('#productId').attr('data-id')
             var price = $('#totalCart').attr('data-total_price')
             var name = $('#productName').val() 
-            var attribute_id = attribute_name = ''
+            var attribute_name = ''
             if($('#attrName').val()){
                 attribute_name = $('#attrName').val()
-                attribute_id = $('#productAttrId').val()
             }
             var tr = $($('noscript#product-clone').html()).clone()
             tr.find('input[name="product_id[]"]').val(id)
             tr.find('input[name="product_price[]"]').val(price)
-            tr.find('input[name="attribute_id[]"]').val(attribute_id)
             tr.find('.product_name').html(name)
             tr.find('.attribute_name').html(attribute_name)
             tr.find('.product_price').text('x ' + parseFloat(price).toLocaleString())
             tr.find('.product_total').text(parseFloat(price).toLocaleString())
             $('#product-list tbody').append(tr)
             calc_product()
-            checkPromo(id, name, attribute_name, attribute_id)
             tr.find('.rem-product').click(function() {
                 if (confirm("Bạn có chắc chăn muốn xóa món " + name + " không?") === true) {
                     tr.remove()
@@ -442,13 +390,30 @@ if (isset($_GET['id'])) {
                 }
             })
             tr.find('.btn-plus').click(function(){
-                change(tr, 'plus')
+                var qty = parseFloat($(this).parent().find('[name="product_qty[]"]').val())
+                qty += 1
+                $(this).parent().find('[name="product_qty[]"]').val(qty)
+                var total = parseFloat(qty) * parseFloat(price)
+                tr.find('.product_total').text(parseFloat(total).toLocaleString())
+                calc_product()
             })
             tr.find('.btn-minus').click(function(){
-                change(tr, 'minus')
+                var qty = parseFloat($(this).parent().find('[name="product_qty[]"]').val())
+                qty -= 1
+                if(qty < 0){
+                    qty = 0;
+                }
+                $(this).parent().find('[name="product_qty[]"]').val(qty)
+                var total = parseFloat(qty) * parseFloat(price)
+                tr.find('.product_total').text(parseFloat(total).toLocaleString())
+                calc_product()
             })
             tr.find('[name="product_qty[]"]').on('input change', function() {
-                change(tr, 'change')
+                var qty = $(this).val()
+                qty = qty > 0 ? qty : 0
+                var total = parseFloat(qty) * parseFloat(price)
+                tr.find('.product_total').text(parseFloat(total).toLocaleString())
+                calc_product()
 
             })
         })
@@ -470,7 +435,6 @@ if (isset($_GET['id'])) {
                 // var total = parseFloat(pQty) * parseFloat(price)
                 // $(t).find('.product_total').text(parseFloat(total).toLocaleString())
                 // calc_product()
-                alert('Nhấn dấu + để thêm số lượng')
                 return false;
             }
             var tr = $($('noscript#product-clone').html()).clone()
@@ -481,25 +445,38 @@ if (isset($_GET['id'])) {
             tr.find('.product_total').text(parseFloat(price).toLocaleString())
             $('#product-list tbody').append(tr)
             calc_product()
-            
-            checkPromo(id, name)
             tr.find('.rem-product').click(function() {
                 if (confirm("Bạn có chắc chăn muốn xóa món " + name + " không?") === true) {
-                    if($(tr).next().attr('promotion') == 'true'){
-                        $(tr).next().remove()
-                    }
                     tr.remove()
                     calc_product()
                 }
             })
             tr.find('.btn-plus').click(function(){
-                changeQty(tr, 'plus')
+                var qty = parseFloat($(this).parent().find('[name="product_qty[]"]').val())
+                qty += 1
+                $(this).parent().find('[name="product_qty[]"]').val(qty)
+                var total = parseFloat(qty) * parseFloat(price)
+                tr.find('.product_total').text(parseFloat(total).toLocaleString())
+                calc_product()
             })
             tr.find('.btn-minus').click(function(){
-                changeQty(tr, 'minus')
+                var qty = parseFloat($(this).parent().find('[name="product_qty[]"]').val())
+                qty -= 1
+                if(qty < 0){
+                    qty = 0;
+                }
+                $(this).parent().find('[name="product_qty[]"]').val(qty)
+                var total = parseFloat(qty) * parseFloat(price)
+                tr.find('.product_total').text(parseFloat(total).toLocaleString())
+                calc_product()
             })
             tr.find('[name="product_qty[]"]').on('input change', function() {
-                changeQty(tr, 'change')
+                var qty = $(this).val()
+                qty = qty > 0 ? qty : 0
+                var total = parseFloat(qty) * parseFloat(price)
+                tr.find('.product_total').text(parseFloat(total).toLocaleString())
+                calc_product()
+
             })
         })
         $('#sale-form').submit(function(e) {
@@ -543,65 +520,5 @@ if (isset($_GET['id'])) {
                 alert('Vui lòng chọn món')
             }
         })
-
-        function changeQty(tr, type){
-            var qty = parseFloat($(tr).find('[name="product_qty[]"]').val())
-            var price = $(tr).find('[name="product_price[]"]').val()
-            if(type == 'minus'){
-                qty -= 1
-                if(qty < 0){
-                    qty = 0;
-                }
-            }else if(type == 'plus'){
-                qty += 1
-            }
-            
-            if($('#promotion_id').length){
-                var promotion = $('#promotion_id').attr('data');
-                promotion = JSON.parse(promotion)
-                if(promotion['discount_type'] == 'PRODUCT'){
-                    if(promotion['product_type'] == 'SAME'){
-                        var buy = promotion['buy']
-                        var gift = promotion['gift']
-                        var qtyPr = Math.floor(qty/buy)
-                        if(qtyPr>=0){
-                            $(tr).next().find('.quantity span').text(qtyPr)
-                            $(tr).next().find('.quantity input').val(qtyPr)
-                        }
-                    }
-                }
-            }
-            
-            $(tr).parent().find('[name="product_qty[]"]').val(qty)
-            var total = parseFloat(qty) * parseFloat(price)
-            $(tr).find('.product_total').text(parseFloat(total).toLocaleString())
-            calc_product()
-        }
-        
-        function checkPromo(id, name, attr="", attribute_id=""){
-            if($('#promotion_id').length){
-                var promotion = $('#promotion_id').attr('data');
-                promotion = JSON.parse(promotion)
-                if(promotion['discount_type'] == 'PRODUCT'){
-                    if(promotion['product_type'] == 'SAME'){
-                        var trPromo = $($('noscript#product-clone').html()).clone()
-                        trPromo.find('td:last-child').find('button').remove()
-                        trPromo.find('input[name="product_id[]"]').val(id)
-                        trPromo.find('input[name="product_price[]"]').val(0)
-                        trPromo.find('.product_name').text(name)
-                        trPromo.find('.attribute_name').html(attr)
-                        trPromo.find('input[name="attribute_id[]"]').val(attribute_id)
-                        trPromo.find('.product_price').text('x ' + 0)
-                        trPromo.find('.product_total').text(0)
-                        trPromo.attr('promotion', true)
-                        $('#product-list tbody').append(trPromo)
-                        calc_product()
-                        trPromo.find('.quantity').html('<span>1</span><input type="hidden" class="form-control form-control-sm rounded-0 text-center" min="0" name="product_qty[]" value="1" required>')
-                        $('#notes .alert').html(promotion['name'])
-                        $('#notes').removeClass('d-none')
-                    }
-                }
-            }
-        }
     })
 </script>
