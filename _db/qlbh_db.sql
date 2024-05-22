@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1:3306
--- Generation Time: May 20, 2024 at 09:18 AM
+-- Generation Time: May 22, 2024 at 08:54 AM
 -- Server version: 8.0.31
 -- PHP Version: 8.0.26
 
@@ -157,7 +157,7 @@ INSERT INTO `product_list` (`id`, `category_id`, `name`, `description`, `price`,
 
 DROP TABLE IF EXISTS `promotion`;
 CREATE TABLE IF NOT EXISTS `promotion` (
-  `id` int NOT NULL,
+  `id` int NOT NULL AUTO_INCREMENT,
   `name` varchar(255) DEFAULT NULL,
   `description` text,
   `from_date` date DEFAULT NULL,
@@ -170,10 +170,19 @@ CREATE TABLE IF NOT EXISTS `promotion` (
   `gift` int DEFAULT NULL,
   `min_amount` float DEFAULT NULL,
   `delete_flag` int NOT NULL DEFAULT '0',
+  `status` int DEFAULT NULL,
   `date_created` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `date_updated` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  `updated_by` int DEFAULT NULL
-) ENGINE=MyISAM DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+  `updated_by` int DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=MyISAM AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+--
+-- Dumping data for table `promotion`
+--
+
+INSERT INTO `promotion` (`id`, `name`, `description`, `from_date`, `to_date`, `product_ids`, `product_type`, `discount_type`, `discount`, `buy`, `gift`, `min_amount`, `delete_flag`, `status`, `date_created`, `date_updated`, `updated_by`) VALUES
+(1, 'Mua 1 tặng 1 nhân dịp khai trương', 'Mua 1 tặng 1 nhân dịp khai trương', '2024-05-26', '2024-05-27', '[\"6\"]', 'SAME', 'PRODUCT', 0, 1, 1, 0, 0, 1, '2024-05-21 13:28:07', '2024-05-22 15:49:55', NULL);
 
 -- --------------------------------------------------------
 
@@ -214,6 +223,22 @@ INSERT INTO `promotion_code` (`id`, `code`, `name`, `description`, `from_date`, 
 -- --------------------------------------------------------
 
 --
+-- Table structure for table `sale_attributes`
+--
+
+DROP TABLE IF EXISTS `sale_attributes`;
+CREATE TABLE IF NOT EXISTS `sale_attributes` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `sale_id` int DEFAULT NULL,
+  `product_id` int DEFAULT NULL,
+  `attribute_id` int DEFAULT NULL,
+  `sale_product_id` int DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+-- --------------------------------------------------------
+
+--
 -- Table structure for table `sale_list`
 --
 
@@ -221,13 +246,15 @@ DROP TABLE IF EXISTS `sale_list`;
 CREATE TABLE IF NOT EXISTS `sale_list` (
   `id` int NOT NULL AUTO_INCREMENT,
   `user_id` int DEFAULT NULL,
+  `promotion_id` int DEFAULT NULL,
   `code` varchar(100) NOT NULL,
   `client_name` text NOT NULL,
+  `phone_number` varchar(20) DEFAULT NULL,
   `amount` float(15,2) NOT NULL DEFAULT '0.00',
   `tendered` float(15,2) NOT NULL DEFAULT '0.00',
   `surplus_amount` float DEFAULT NULL,
   `no_receive_change` int DEFAULT NULL,
-  `payment_type` tinyint(1) NOT NULL COMMENT '1 = Cash,\r\n2 = Debit Card,\r\n3 = Credit Card',
+  `payment_type` tinyint(1) NOT NULL COMMENT '1 = Tiền mặt,\r\n2 = Chuyển khoản,\r\n3 = Credit Card',
   `payment_code` text,
   `status` int DEFAULT NULL,
   `type` int DEFAULT NULL,
@@ -236,19 +263,28 @@ CREATE TABLE IF NOT EXISTS `sale_list` (
   `date_updated` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
   KEY `user_id` (`user_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=9 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=20 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 --
 -- Dumping data for table `sale_list`
 --
 
-INSERT INTO `sale_list` (`id`, `user_id`, `code`, `client_name`, `amount`, `tendered`, `surplus_amount`, `no_receive_change`, `payment_type`, `payment_code`, `status`, `type`, `total_received`, `date_created`, `date_updated`) VALUES
-(1, 1, '202204220001', 'Guest', 710.00, 1000.00, NULL, NULL, 1, '', NULL, NULL, NULL, '2022-04-22 13:54:44', '2022-04-22 13:54:44'),
-(2, 2, '202204220002', 'Guest', 675.00, 700.00, NULL, NULL, 2, '123121ABcdF', NULL, NULL, NULL, '2022-04-22 15:27:02', '2022-04-22 15:27:02'),
-(3, 1, '202405070001', 'Guest', 48000.00, 0.00, NULL, NULL, 1, '', NULL, NULL, NULL, '2024-05-07 20:50:16', '2024-05-07 20:50:16'),
-(5, 1, '202405140001', 'Guest', 96000.00, 100000.00, NULL, NULL, 1, '', 1, NULL, NULL, '2024-05-14 15:29:14', '2024-05-20 13:37:17'),
-(7, 1, '202405180001', 'Guest', 18000.00, 0.00, NULL, NULL, 1, '', NULL, NULL, NULL, '2024-05-18 08:11:16', '2024-05-18 08:11:16'),
-(8, 1, '202405180002', 'Guest', 15000.00, 0.00, NULL, NULL, 1, '', NULL, NULL, NULL, '2024-05-18 08:30:28', '2024-05-18 08:30:28');
+INSERT INTO `sale_list` (`id`, `user_id`, `promotion_id`, `code`, `client_name`, `phone_number`, `amount`, `tendered`, `surplus_amount`, `no_receive_change`, `payment_type`, `payment_code`, `status`, `type`, `total_received`, `date_created`, `date_updated`) VALUES
+(1, 1, NULL, '202204220001', 'Guest', NULL, 710.00, 1000.00, NULL, NULL, 1, '', NULL, NULL, NULL, '2022-04-22 13:54:44', '2022-04-22 13:54:44'),
+(2, 2, NULL, '202204220002', 'Guest', NULL, 675.00, 700.00, NULL, NULL, 2, '123121ABcdF', NULL, NULL, NULL, '2022-04-22 15:27:02', '2022-04-22 15:27:02'),
+(3, 1, NULL, '202405070001', 'Guest', NULL, 48000.00, 0.00, NULL, NULL, 1, '', NULL, NULL, NULL, '2024-05-07 20:50:16', '2024-05-07 20:50:16'),
+(5, 1, NULL, '202405140001', 'Guest', NULL, 96000.00, 100000.00, NULL, NULL, 1, '', 1, NULL, NULL, '2024-05-14 15:29:14', '2024-05-20 13:37:17'),
+(7, 1, NULL, '202405180001', 'Guest', NULL, 18000.00, 0.00, NULL, NULL, 1, '', NULL, NULL, NULL, '2024-05-18 08:11:16', '2024-05-18 08:11:16'),
+(8, 1, NULL, '202405180002', 'Guest', NULL, 15000.00, 20000.00, NULL, NULL, 1, '', 1, NULL, NULL, '2024-05-18 08:30:28', '2024-05-21 15:28:47'),
+(9, 1, 1, '202405220001', 'Guest', NULL, 85000.00, 100000.00, NULL, NULL, 1, '', 1, NULL, NULL, '2024-05-22 12:54:25', '2024-05-22 14:19:58'),
+(10, 1, 1, '202405220002', 'Guest', NULL, 20000.00, 0.00, NULL, NULL, 0, NULL, 0, NULL, NULL, '2024-05-22 14:53:49', '2024-05-22 14:53:49'),
+(11, 1, 1, '202405220003', 'Guest', NULL, 20000.00, 0.00, NULL, NULL, 0, NULL, 0, NULL, NULL, '2024-05-22 14:53:56', '2024-05-22 14:53:56'),
+(14, 1, 1, '202405220004', 'Guest', NULL, 20000.00, 0.00, NULL, NULL, 0, NULL, 0, NULL, NULL, '2024-05-22 15:01:46', '2024-05-22 15:01:46'),
+(15, 1, 1, '202405220005', 'Guest', NULL, 20000.00, 0.00, NULL, NULL, 0, NULL, 0, NULL, NULL, '2024-05-22 15:02:28', '2024-05-22 15:02:28'),
+(16, 1, 1, '202405220006', 'Guest', NULL, 20000.00, 0.00, NULL, NULL, 0, NULL, 0, NULL, NULL, '2024-05-22 15:03:58', '2024-05-22 15:03:58'),
+(17, 1, 1, '202405220007', 'Guest', NULL, 20000.00, 0.00, NULL, NULL, 0, NULL, 0, NULL, NULL, '2024-05-22 15:05:30', '2024-05-22 15:05:30'),
+(18, 1, 1, '202405220008', 'Guest', NULL, 32000.00, 0.00, NULL, NULL, 0, NULL, 0, NULL, NULL, '2024-05-22 15:06:13', '2024-05-22 15:34:31'),
+(19, 1, NULL, '202405220009', 'Guest', '', 42000.00, 0.00, NULL, NULL, 0, NULL, 0, NULL, NULL, '2024-05-22 15:50:18', '2024-05-22 15:50:18');
 
 -- --------------------------------------------------------
 
@@ -262,7 +298,7 @@ CREATE TABLE IF NOT EXISTS `sale_products` (
   `product_id` int NOT NULL,
   `qty` int NOT NULL,
   `price` float(15,2) NOT NULL DEFAULT '0.00',
-  `attribute_id` int DEFAULT NULL,
+  `attribute_id` text,
   KEY `sale_id` (`sale_id`),
   KEY `product_id` (`product_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
@@ -285,7 +321,13 @@ INSERT INTO `sale_products` (`sale_id`, `product_id`, `qty`, `price`, `attribute
 (1, 11, 1, 11.00, NULL),
 (5, 4, 3, 18000.00, NULL),
 (5, 3, 1, 12000.00, NULL),
-(5, 7, 2, 15000.00, NULL);
+(5, 7, 2, 15000.00, NULL),
+(9, 4, 5, 17000.00, NULL),
+(9, 4, 5, 0.00, NULL),
+(18, 10, 1, 32000.00, '3,9,4'),
+(18, 10, 1, 0.00, '3,9,4'),
+(19, 4, 1, 17000.00, ''),
+(19, 10, 1, 25000.00, '3,9');
 
 -- --------------------------------------------------------
 
