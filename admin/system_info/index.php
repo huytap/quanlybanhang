@@ -27,7 +27,7 @@
 			</div> -->
 		</div>
 		<div class="card-body">
-			<form action="" id="system-frm">
+			<form action="" id="system-frm" enctype="multipart/form-data">
 				<div id="msg" class="form-group"></div>
 				<div class="form-group">
 					<label for="name" class="control-label">System Name</label>

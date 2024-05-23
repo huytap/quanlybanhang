@@ -33,18 +33,12 @@ if (isset($_GET['id'])) {
             <div class="container-fluid row justify-content-center">
                 <div class="col-lg-6 col-md-8 col-sm-12 col-xs-12">
                     <div id="printout">
-                        <div class="row">
-                            <div class="col-md-6">
-                                <div class="d-flex">
-                                    <div class="col-auto"><b>Số HĐ:</b></div>
-                                    <div class="col-auto ps-1 flex-shrink-1 flex-grow-1 border-dark"><?= isset($code) ? $code : "" ?></div>
-                                </div>
+                        <div class="d-flex">
+                            <div class="col-6">
+                                <b>Số HĐ:</b> <?= isset($code) ? $code : "" ?>
                             </div>
-                            <div class="col-md-6">
-                                <div class="d-flex">
-                                    <div class="col-auto"><b>Ngày:</b></div>
-                                    <div class="col-auto ps-1 flex-shrink-1 flex-grow-1 border-dark"><?= isset($date_created) ? date("Y-m-d h:i A", strtotime($date_created)) : "" ?></div>
-                                </div>
+                            <div class="col-6">
+                                <b>Ngày:</b> <?= isset($date_created) ? date("Y-m-d h:i A", strtotime($date_created)) : "" ?>
                             </div>
                         </div>
                         <div class="mb-2"></div>
@@ -99,7 +93,7 @@ if (isset($_GET['id'])) {
                         </h6>
                         <?php if($status == '1'){?>
                             <div class="d-flex">
-                                <div class="col-5">Đã nhận</div>
+                                <div class="col-5">Tiền khách đưa</div>
                                 <div class="col-7 text-right"><?= isset($tendered) ? format_num($tendered, 0) : 0 ?></div>
                             </div>
                             <div class="d-flex">
@@ -146,7 +140,7 @@ if (isset($_GET['id'])) {
                             <input type="hidden" name="id" value="<?= isset($id) ? $id : '' ?>">
                             <input type="hidden" name="amount" value="<?= isset($amount) ? $amount : 0 ?>">
                             <div class="d-flex w-100 align-items-center">
-                                <div class="col-4">Đã nhận:</div>
+                                <div class="col-4">Tiền khách đưa:</div>
                                 <div class="col-8">
                                     <input type="text" pattern="[0-9\.]*$" class="form-control form-control-lg rounded-0 text-right" id="tendered" name="tendered" value="<?= isset($tendered) ? number_format($tendered): '0' ?>" required />
                                 </div>
@@ -178,6 +172,15 @@ if (isset($_GET['id'])) {
                         </form>
                     <?php
                     }?>
+                    <div class="d-flex">
+                        <div class="col-4">Khách đặt</div>
+                        <div class="col-8 text-right">
+                            <?php
+                            $order_type = isset($order_type) ? $order_type : 0;
+                            echo DRINK[$order_type];
+                            ?>
+                        </div>
+                    </div>
                 </div>
             </div>
             <hr>
@@ -203,17 +206,25 @@ if (isset($_GET['id'])) {
             background: unset !important;
             min-height: unset !important
         }
+        p{
+            font-size: 12px;
+        }
     </style>
     <div class="d-flex">
         <div class="col-12 text-center">
             <h4 class="tex-center"><?= $_settings->info('name') ?></h4>
             <p class="tex-center mb-0"><?= $_settings->info('short_name') ?></p>
+            <p class="tex-center mb-0">ĐT: 0344 384 234</p>
+            <h3 class="tex-center">HÓA ĐƠN THANH TOÁN</h3>
         </div>
     </div>
     <hr>
 </noscript>
 <script>
     $(function() {
+        if($('#tendered').length){
+            $('#tendered').focus()
+        }
         $('#print').click(function() {
             var head = $('head').clone()
             var p = $($('#printout').html()).clone()

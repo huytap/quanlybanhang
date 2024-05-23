@@ -235,7 +235,7 @@ if (isset($_GET['id'])) {
                                                                 <input type="hidden" name="attribute_id[]" value="<?= $row['attribute_id'] ?>">
                                                                 <div class="quantity text-center">
                                                                 <?php if($row['promotion_id']>0 && $row['price'] <= 0){
-                                                                        echo '<span>'.$row['qty'].'</span>';
+                                                                        echo '<span class="qtytext">'.$row['qty'].'</span>';
                                                                         echo '<input type="hidden" class="form-control form-control-sm rounded-0 text-center" min="0" name="product_qty[]" value="'.$row['qty'].'" required>';
                                                                     }else{?>
                                                                         <button type="button" class="btn btn-primary btn-minus"> 
@@ -271,6 +271,17 @@ if (isset($_GET['id'])) {
                                     <div class="text-light w-100 mt-1 d-flex" id="summary">
                                         <div class="col-auto">Tổng tiền:</div>
                                         <div class="col-auto flex-shrink-1 flex-grow-1 truncate-1 text-right" id="amount"><?= isset($amount) ? format_num($amount, 0) : '0.00' ?></div>
+                                    </div>
+                                    <div class="d-flex w-100 align-items-center mt-2">
+                                        <div class="col-4">Đặt:</div>
+                                        <div class="col-8">
+                                            <select name="order_type" id="order_type" class="form-control rounded-0" required="required">
+                                                <?php 
+                                                foreach(DRINK as $k => $p){    
+                                                    echo '<option value="'.$k.'"'.(isset($order_type) && $order_type == 1 ? "selected" : "").'>'. $p. '</option>';
+                                                }?>
+                                            </select>
+                                        </div>
                                     </div>
                                     <!-- <div class="d-flex w-100 align-items-center">
                                         <div class="col-4">Đã nhận:</div>
@@ -383,131 +394,31 @@ if (isset($_GET['id'])) {
     }
     $(function() {
         $('body').addClass('sidebar-collapse')
-        $('#payment_type').change(function() {
-            var type = $(this).val()
-            if (type == 1) {
-                $('#payment_code').addClass('d-none').attr('required', false)
-            } else {
-                $('#payment_code').removeClass('d-none').attr('required', true)
-            }
-        })
-        $('#product-list tbody tr').each(function(i, tr) {
-            $(tr).find('.rem-product').click(function(){
-                if (confirm("Bạn có chắc chăn muốn xóa món " + ($(tr).find('.product_name').text()) + " không?") === true) {
-                    if($(tr).next().attr('promotion') == 'true'){
-                        $(tr).next().remove()
-                    }
-                    $(tr).remove()
-                    calc_product()
-                }
-            })
-            $(tr).find('.btn-plus').click(function(){
-                changeQty(tr, 'plus')
-            })
-            $(tr).find('.btn-minus').click(function(){
-                changeQty(tr, 'minus')
-            })
-            $(tr).find('[name="product_qty[]"]').on('input change', function() {
-                changeQty(tr, 'change')
-            })
-        })
-        $('#tendered').on('input', function() {
-            calc_change()
-        })
+        // $('#payment_type').change(function() {
+        //     var type = $(this).val()
+        //     if (type == 1) {
+        //         $('#payment_code').addClass('d-none').attr('required', false)
+        //     } else {
+        //         $('#payment_code').removeClass('d-none').attr('required', true)
+        //     }
+        // })
+        // $('#tendered').on('input', function() {
+        //     calc_change()
+        // })
+        itemInCart()
         $('#submit').click(function(){
             $('#uni_modal').modal('hide')
-            var id = $('#productId').val()
-            var price = $('#totalCart').attr('data-total_price')
-            var name = $('#productName').val() 
-            var attribute_id = attribute_name = ''
-            if($('#attrName').val()){
-                attribute_name = $('#attrName').val()
-                attribute_id = $('#productAttrId').val()
-            }
-            var tr = $($('noscript#product-clone').html()).clone()
-            tr.find('input[name="product_id[]"]').val(id)
-            tr.find('input[name="product_price[]"]').val(price)
-            tr.find('input[name="attribute_id[]"]').val(attribute_id)
-            tr.find('.product_name').html(name)
-            tr.find('.attribute_name').html(attribute_name)
-            tr.find('.product_price').text('x ' + parseFloat(price).toLocaleString())
-            tr.find('.product_total').text(parseFloat(price).toLocaleString())
-            $('#product-list tbody').append(tr)
-            calc_product()
-            checkPromo(id, name, attribute_name, attribute_id)
-            tr.find('.rem-product').click(function() {
-                if (confirm("Bạn có chắc chăn muốn xóa món " + name + " không?") === true) {
-                    tr.remove()
-                    calc_product()
-                }
-            })
-            tr.find('.btn-plus').click(function(){
-                change(tr, 'plus')
-            })
-            tr.find('.btn-minus').click(function(){
-                change(tr, 'minus')
-            })
-            tr.find('[name="product_qty[]"]').on('input change', function() {
-                change(tr, 'change')
-
-            })
+            addToCart('submit')
         })
         $('.prod-item').click(function() {
-            var id = $(this).attr('data-id')
-            var price = $(this).attr('data-price')
-            var name = $(this).attr('menu-name').trim()
-            var upsize = $(this).attr('data-upsize');
-            if(upsize > 0){
-                uni_modal("Thêm món mới", "sales/select_menu.php?id=" + id +"&price="+price+"&upsize="+upsize+"&name=" + name, 'modal-sm');
-                return false;
-            }
-            if ($('#product-list tbody tr input[name="product_id[]"][value="' + id + '"]').length > 0) {
-                // var t = $('#product-list tbody tr input[name="product_id[]"][value="' + id + '"]').closest('div')
-                // var pQty = $(t).find('[name="product_qty[]"]').val()
-                // pQty ++
-                // $(t).find('[name="product_qty[]"]').val(pQty)
-                // //alert("Thực đơn đã có trong danh sách")
-                // var total = parseFloat(pQty) * parseFloat(price)
-                // $(t).find('.product_total').text(parseFloat(total).toLocaleString())
-                // calc_product()
-                alert('Nhấn dấu + để thêm số lượng')
-                return false;
-            }
-            var tr = $($('noscript#product-clone').html()).clone()
-            tr.find('input[name="product_id[]"]').val(id)
-            tr.find('input[name="product_price[]"]').val(price)
-            tr.find('.product_name').text(name)
-            tr.find('.product_price').text('x ' + parseFloat(price).toLocaleString())
-            tr.find('.product_total').text(parseFloat(price).toLocaleString())
-            $('#product-list tbody').append(tr)
-            calc_product()
-            
-            checkPromo(id, name)
-            tr.find('.rem-product').click(function() {
-                if (confirm("Bạn có chắc chăn muốn xóa món " + name + " không?") === true) {
-                    if($(tr).next().attr('promotion') == 'true'){
-                        $(tr).next().remove()
-                    }
-                    tr.remove()
-                    calc_product()
-                }
-            })
-            tr.find('.btn-plus').click(function(){
-                changeQty(tr, 'plus')
-            })
-            tr.find('.btn-minus').click(function(){
-                changeQty(tr, 'minus')
-            })
-            tr.find('[name="product_qty[]"]').on('input change', function() {
-                changeQty(tr, 'change')
-            })
+            addToCart(this)
         })
         $('#sale-form').submit(function(e) {
             e.preventDefault();
             var _this = $(this)
             $('.err-msg').remove();
             start_loader();
-            if ($('#product-list').find('tbody').find('tr').length)
+            if ($('#product-list').find('tbody').find('tr').length && $('input[name="amount"]').val()>0)
                 $.ajax({
                     url: _base_url_ + "classes/Master.php?f=save_sale",
                     data: new FormData($(this)[0]),
@@ -544,9 +455,10 @@ if (isset($_GET['id'])) {
             }
         })
 
-        function changeQty(tr, type){
+        function changeQty(tr, type, name){
             var qty = parseFloat($(tr).find('[name="product_qty[]"]').val())
             var price = $(tr).find('[name="product_price[]"]').val()
+            var id = $(tr).find('[name="product_id[]"]').val()
             if(type == 'minus'){
                 qty -= 1
                 if(qty < 0){
@@ -556,7 +468,7 @@ if (isset($_GET['id'])) {
                 qty += 1
             }
             
-            if($('#promotion_id').length){
+            if($('#promotion_id').length && $(tr).next().attr('promotion') == 'true'){
                 var promotion = $('#promotion_id').attr('data');
                 promotion = JSON.parse(promotion)
                 if(promotion['discount_type'] == 'PRODUCT'){
@@ -565,25 +477,27 @@ if (isset($_GET['id'])) {
                         var gift = promotion['gift']
                         var qtyPr = Math.floor(qty/buy)
                         if(qtyPr>=0){
-                            $(tr).next().find('.quantity span').text(qtyPr)
+                            $(tr).next().find('.quantity .qtytext').text(qtyPr)
                             $(tr).next().find('.quantity input').val(qtyPr)
                         }
                     }
                 }
             }
             
-            $(tr).parent().find('[name="product_qty[]"]').val(qty)
+            $(tr).find('[name="product_qty[]"]').val(qty)
             var total = parseFloat(qty) * parseFloat(price)
             $(tr).find('.product_total').text(parseFloat(total).toLocaleString())
-            calc_product()
+            calc_product()                            
+            if($(tr).next().attr('promotion') != 'true')
+                checkPromo(tr, id, name)
         }
         
-        function checkPromo(id, name, attr="", attribute_id=""){
+        function checkPromo(tr, id, name, attr="", attribute_id=""){
             if($('#promotion_id').length){
                 var promotion = $('#promotion_id').attr('data');
                 promotion = JSON.parse(promotion)
                 if(promotion['discount_type'] == 'PRODUCT'){
-                    if(promotion['product_type'] == 'SAME'){
+                    if(promotion['product_type'] == 'SAME' && promotion['buy'] <= $(tr).find('[name="product_qty[]"]').val()){
                         var trPromo = $($('noscript#product-clone').html()).clone()
                         trPromo.find('td:last-child').find('button').remove()
                         trPromo.find('input[name="product_id[]"]').val(id)
@@ -596,12 +510,98 @@ if (isset($_GET['id'])) {
                         trPromo.attr('promotion', true)
                         $('#product-list tbody').append(trPromo)
                         calc_product()
-                        trPromo.find('.quantity').html('<span>1</span><input type="hidden" class="form-control form-control-sm rounded-0 text-center" min="0" name="product_qty[]" value="1" required>')
+                        trPromo.find('.quantity').html('<span class="qtytext">1</span><input type="hidden" class="form-control form-control-sm rounded-0 text-center" min="0" name="product_qty[]" value="1" required>')
                         $('#notes .alert').html(promotion['name'])
                         $('#notes').removeClass('d-none')
                     }
                 }
             }
+        }
+
+        function addToCart(el){
+            var tr = $($('noscript#product-clone').html()).clone()
+            var upsize = $(el).attr('data-upsize');
+            if(el == 'submit'){
+                var id = $('#productId').val()
+                var price = $('#totalCart').attr('data-total_price')
+                var name = $('#productName').val() 
+            }else{
+                var id = $(el).attr('data-id')
+                var price = $(el).attr('data-price')
+                var name = $(el).attr('menu-name').trim()   
+            }
+            if(upsize > 0){
+                uni_modal("Thêm món mới", "sales/select_menu.php?id=" + id +"&price="+price+"&upsize="+upsize+"&name=" + name, 'modal-sm');
+                return false;
+            }  
+            // if ($('#product-list tbody tr input[name="product_id[]"][value="' + id + '"]').length > 0) {
+            //     if ($('#product-list tbody tr input[name="attribute_id[]"]').val() > 0) {
+            //         alert('Nhấn dấu + để thêm số lượng')
+            //         return false;
+            //     }else{
+            //         alert('Nhấn dấu + để thêm số lượng')
+            //         return false;
+            //     }
+            // }
+            tr.find('input[name="product_id[]"]').val(id)
+            tr.find('input[name="product_price[]"]').val(price)
+            tr.find('.product_name').text(name)
+            tr.find('.product_price').text('x ' + parseFloat(price).toLocaleString())
+            tr.find('.product_total').text(parseFloat(price).toLocaleString())
+            $('#product-list tbody').append(tr)
+            tr.find('.rem-product').click(function() {
+                if (confirm("Bạn có chắc chăn muốn xóa món " + name + " không?") === true) {
+                    if($(tr).next().attr('promotion') == 'true'){
+                        $(tr).next().remove()
+                    }
+                    tr.remove()
+                    calc_product()
+                }
+            })
+            tr.find('.btn-plus').click(function(){
+                changeQty(tr, 'plus', name)
+            })
+            tr.find('.btn-minus').click(function(){
+                changeQty(tr, 'minus', name)
+            })
+            tr.find('[name="product_qty[]"]').on('input change', function() {
+                changeQty(tr, 'change', name)
+            })
+            calc_product()
+            
+            var attribute_id = attribute_name = ''
+            if($('#attrName').val()){
+                attribute_name = $('#attrName').val()
+                attribute_id = $('#productAttrId').val()
+                tr.find('input[name="attribute_id[]"]').val(attribute_id)
+                tr.find('.attribute_name').html(attribute_name)
+                checkPromo(tr, id, name, attribute_name, attribute_id)
+            }else{                       
+                checkPromo(tr, id, name)
+            }
+        }
+
+        function itemInCart(){            
+            $('#product-list tbody tr').each(function(i, tr) {
+                $(tr).find('.rem-product').click(function(){
+                    if (confirm("Bạn có chắc chăn muốn xóa món " + ($(tr).find('.product_name').text()) + " không?") === true) {
+                        if($(tr).next().attr('promotion') == 'true'){
+                            $(tr).next().remove()
+                        }
+                        $(tr).remove()
+                        calc_product()
+                    }
+                })
+                $(tr).find('.btn-plus').click(function(){
+                    changeQty(tr, 'plus', name)
+                })
+                $(tr).find('.btn-minus').click(function(){
+                    changeQty(tr, 'minus', name)
+                })
+                $(tr).find('[name="product_qty[]"]').on('input change', function() {
+                    changeQty(tr, 'change', name)
+                })
+            })
         }
     })
 </script>
