@@ -51,6 +51,7 @@ if (isset($_GET['id']) && $_GET['id'] > 0) {
 ?>
 <input type="hidden" id="productAttrId">
 <input type="hidden" id="productId" value="<?= $_GET['id'] ?>">
+<input type="hidden" id="categoryId" value="<?= $_GET['category_id'] ?>">
 <input type="hidden" id="productName" value="<?= $_GET['name'] ?>">
 <input type="hidden" id="attrName" value="">
 <div class="bg-red mt-2 white-color text-center p-2 font-weight-bold">Tổng: <span id="totalCart" data-total_price="<?= $_GET['price']; ?>" data-total="<?= $_GET['price']; ?>"><?= number_format($_GET['price']) ?></span>đ</div>
@@ -84,6 +85,7 @@ if (isset($_GET['id']) && $_GET['id'] > 0) {
         var stringAttrName = attrName.join(", ")
         $('#productAttrId').val(attr)
         $('#attrName').val(stringAttrName)
+        //$('#attrName').val(attrName[0])
         var grandTotal = $('#totalCart').attr('data-total')
         total = total + parseFloat(grandTotal)
         $('#totalCart').text(total.toLocaleString())

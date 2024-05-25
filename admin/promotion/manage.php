@@ -34,6 +34,28 @@ if (isset($_GET['id']) && $_GET['id'] > 0) {
 				}?>
 			</select>
 		</div>
+		<div class="form-group">
+			<label for="category_apply" class="control-label">Danh mục sản phẩm áp dụng</label>
+			<br>
+			<?php
+				$qry_cate = $conn->query("SELECT `id`, `name` from `category_list` where delete_flag=0");
+				if ($qry_cate->num_rows > 0) {
+					$cate=[];
+					if(isset($category_apply))
+					$cate = json_decode($category_apply, true);
+					while ($row = $qry_cate->fetch_assoc()) :
+						echo '<div class="form-check-inline">
+								<label class="form-check-label">';
+						if(in_array($row['id'], $cate)){
+							echo '<input type="checkbox" class="form-check-input" name="category_apply[]" checked="checked" value="'.$row['id'].'">';
+						}else{
+							echo '<input type="checkbox" class="form-check-input" name="category_apply[]" value="'.$row['id'].'">';
+						}
+						echo $row['name'].'</label></div>';
+					endwhile;
+				} 
+			?>
+		</div>
 		<div class="form-group <?php if(isset($discount_type) && $discount_type == 'PRODUCT') echo ''; else echo 'd-none';?>" id="product_type_list">
 			<label for="product_type" class="control-label">Loại sản phẩm tặng kèm</label>
 			<select name="product_type" id="product_type" class="form-control form-control-sm rounded-0" required>

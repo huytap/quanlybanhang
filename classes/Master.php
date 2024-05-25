@@ -309,12 +309,14 @@ Class Master extends DBConnection {
 			if(isset($product_id)){
 				$data = "";
 				foreach($product_id as $k =>$v){
-					$pid = $v;
-					$price = $this->conn->real_escape_string($product_price[$k]);
-					$qty = $this->conn->real_escape_string($product_qty[$k]);
-					$attr_id = $this->conn->real_escape_string($attribute_id[$k]);
-					if(!empty($data)) $data .= ", ";
-					$data .= "('{$sid}', '{$pid}', '{$qty}', '{$price}', '{$attr_id}')";
+					if($v){
+						$pid = $v;
+						$price = $this->conn->real_escape_string($product_price[$k]);
+						$qty = $this->conn->real_escape_string($product_qty[$k]);
+						$attr_id = $this->conn->real_escape_string($attribute_id[$k]);
+						if(!empty($data)) $data .= ", ";
+						$data .= "('{$sid}', '{$pid}', '{$qty}', '{$price}', '{$attr_id}')";
+					}
 				}
 				if(!empty($data)){
 					$this->conn->query("DELETE FROM `sale_products` where sale_id = '{$sid}'");
@@ -437,6 +439,11 @@ Class Master extends DBConnection {
 		if(isset($_POST['product_ids']) && $_POST['product_ids']){
 			$data .= "`product_ids`='".json_encode($_POST['product_ids'])."'";
 			unset($_POST['product_ids']);
+		}
+		if(isset($_POST['category_apply']) && $_POST['category_apply']){
+			if(!empty($data)) $data .=",";
+			$data .= "`category_apply`='".json_encode($_POST['category_apply'])."'";
+			unset($_POST['category_apply']);
 		}
 		foreach($_POST as $k =>$v){
 			if(!in_array($k,array('id'))){

@@ -71,19 +71,30 @@ if (isset($_GET['id'])) {
                         $promotion_name = '';
                         $promotion_id = 0;
                         if($promotion->num_rows){?>
-                            <div class="w-100 mt-2 d-flex">
+                            <div id="promotion" class="w-100 mt-2 d-flex">
                                 <div class="col-12">
                                     <label for="client_name" class="control-label">Chương trình KM đang được áp dụng: </label>
                                     <span class="text-red">
                                     <?php                                         
                                         while ($row = $promotion->fetch_assoc()) {
                                             if($row['discount_type'] == 'PRODUCT'){
+                                                $productList = [];
+                                                if($row['product_type'] == 'LIST'){
+                                                    $prList = implode(',', json_decode($row['product_ids'], true));
+                                                    $prQry = $conn->query("SELECT * FROM `product_list` where delete_flag = 0 and `status` = 1 and id in($prList)");
+                                                    $productList = [];
+                                                    while ($row2 = $prQry->fetch_array()) {
+                                                        $productList[$row2['id']] = $row2['name'];
+                                                    }
+                                                }
                                             ?>
-                                                <input data='<?=json_encode($row);?>' type="hidden" product_type="<?=$row['product_type'];?>" 
-                                                name="promotion_id" class="promo" id="promotion_id" 
-                                                value="<?=$row['id'];?>"
-                                                > 
-                                                <label for="promotion_id"><?php echo $row['name'];?></label>
+                                                <div class="promotion-item">
+                                                    <input data='<?=json_encode($row);?>' type="hidden" data-product='<?=json_encode($productList);?>' product_type="<?=$row['product_type'];?>" 
+                                                    name="promotion_id" class="promo" class="promotion_id" 
+                                                    value="<?=$row['id'];?>"
+                                                    > 
+                                                    <label for="promotion_id"><?php echo $row['name'];?></label>
+                                                </div>
                                             <?php 
                                             }
                                         }
@@ -116,20 +127,21 @@ if (isset($_GET['id'])) {
                                                 $category = $conn->query("SELECT * FROM `category_list` where delete_flag = 0 and `status` = 1  order by `name` asc");
                                                 $product = $conn->query("SELECT * FROM `product_list` where delete_flag = 0 and `status` = 1  order by `name` asc");
                                                 $prod_arr = [];
+                                                $cat_arr = [];
                                                 while ($row = $product->fetch_array()) {
                                                     $prod_arr[$row['category_id']][] = $row;
                                                 }
-                                                $cat_arr = array_column($category->fetch_all(MYSQLI_ASSOC), 'name', 'id');
-                                                foreach ($cat_arr as $k => $v) :
+                                                //$cat_arr = array_column($category->fetch_all(MYSQLI_ASSOC));
+                                                while ($row2 = $category->fetch_array()) {
+                                                    $cat_arr[$row2['id']] = $row2['name'];
                                                 ?>
                                                     <li class="nav-item">
-                                                        <a class="nav-link <?= (!$has_active) ? 'active' : '' ?>" id="custom-tabs-one-home-tab" data-toggle="pill" href="#cat-tab-<?= $k ?>" role="tab" aria-controls="cat-tab-<?= $k ?>" aria-selected="<?= (!$has_active) ? 'true' : 'false' ?>"><?= $v ?></a>
+                                                        <a data-has_attribute="<?=$row2['has_attribute'];?>" class="nav-link <?= (!$has_active) ? 'active' : '' ?>" id="category-<?=$row2['id'];?>" data-toggle="pill" href="#cat-tab-<?= $row2['id'] ?>" role="tab" aria-controls="cat-tab-<?= $row2['id'] ?>" aria-selected="<?= (!$has_active) ? 'true' : 'false' ?>"><?= $row2['name'] ?></a>
                                                     </li>
                                                 <?php
                                                     $has_active = true;
-                                                endforeach;
+                                                }
                                                 ?>
-
                                             </ul>
                                         </div>
                                         <div class="card-body">
@@ -142,13 +154,13 @@ if (isset($_GET['id'])) {
                                                         <div class="row">
                                                             <?php if (isset($prod_arr[$k])) : ?>
                                                                 <?php foreach ($prod_arr[$k] as $row) : 
-                                                                    $query = $conn->query("SELECT a.id, `price`, a.name from `product_attributes` pa left join attributes a on pa.attribute_id=a.id where product_id='".$row['id']."' and pa.delete_flag=0");
+                                                                    //$query = $conn->query("SELECT a.id, `price`, a.name from `product_attributes` pa left join attributes a on pa.attribute_id=a.id where product_id='".$row['id']."' and pa.delete_flag=0");
                                                                     ?>
-                                                                    <div class=" col-lg-3 col-md-4 col-sm-12 col-xs-12 px-2 py-3">
+                                                                    <div id="product-<?=$row['id'];?>" class=" col-lg-3 col-md-4 col-sm-12 col-xs-12 px-2 py-3">
                                                                         <div class="card text-dark text-decoration-none">
                                                                             <div class="card-body text-center">
                                                                                 <div class="text-uppercase menu-name mb-2"><?= $row['name'] ?></div>
-                                                                                <button data-upsize="<?=$row["upsize"];?>" menu-name="<?= $row['name'] ?>" type="button" data-price="<?= $row['price'] ?>" data-id="<?= $row['id'] ?>" class="btn btn-primary prod-item"><span class="fa fa-plus"></span></button>
+                                                                                <button data-has_attribute="<?=$row['upsize'];?>" data-upsize="<?=$row["upsize"];?>" menu-name="<?= $row['name'] ?>" type="button" data-price="<?= $row['price'] ?>" data-category_id="<?php echo $k;?>" data-id="<?= $row['id'] ?>" class="btn btn-primary prod-item"><span class="fa fa-plus"></span></button>
                                                                             </div>
                                                                         </div>
                                                                     </div>
@@ -160,7 +172,6 @@ if (isset($_GET['id'])) {
                                                     $has_active = true;
                                                 endforeach;
                                                 ?>
-
                                             </div>
                                         </div>
                                         <!-- /.card -->
@@ -354,6 +365,33 @@ if (isset($_GET['id'])) {
         <td class="px-2 py-1 align-middle text-center"><button class="btn btn-outline-danger border-0 btn-sm rounded-0 rem-product p-1" type="button"><i class="fa fa-times"></i></button></td>
     </tr>
 </noscript>
+<noscript id="product-clone-2">
+    <tr>
+        <td class="px-2 py-1 align-middle" style="line-height:.9em">
+            <select name="product_id[]" class="productList">
+                
+            </select>
+            <i style="display:block;font-size:11px;" class="attribute_name"></i>
+            <p class="m-0"><small class="product_price">x 20,000đ</small></p>
+        </td>
+        <td class="px-2 py-1 align-middle">
+            <input type="hidden" name="product_id[]">
+            <input type="hidden" name="product_price[]">
+            <input type="hidden" name="attribute_id[]">
+            <div class="quantity text-center">
+                <button type="button" class="btn btn-primary btn-minus"> 
+                    <span class="fa fa-minus"></span>
+                </button>
+                <input style="padding-left: 20px;" type="number" class="form-control form-control-sm rounded-0 text-center" min="1" name="product_qty[]" value="1" required>
+                <button type="button" class="btn btn-primary btn-plus"> 
+                    <span class="fa fa-plus"></span>
+                </button>
+            </div>
+        </td>
+        <td class="px-2 py-1 align-middle text-right product_total"></td>
+        <td class="px-2 py-1 align-middle text-center"><button class="btn btn-outline-danger border-0 btn-sm rounded-0 rem-product p-1" type="button"><i class="fa fa-times"></i></button></td>
+    </tr>
+</noscript>
 <script>
     function calc_change() {
         var amount = $('[name="amount"]').val()
@@ -455,7 +493,7 @@ if (isset($_GET['id'])) {
             }
         })
 
-        function changeQty(tr, type, name){
+        function changeQty(tr, type, name, promotion = ''){
             var qty = parseFloat($(tr).find('[name="product_qty[]"]').val())
             var price = $(tr).find('[name="product_price[]"]').val()
             var id = $(tr).find('[name="product_id[]"]').val()
@@ -468,9 +506,9 @@ if (isset($_GET['id'])) {
                 qty += 1
             }
             
-            if($('#promotion_id').length && $(tr).next().attr('promotion') == 'true'){
-                var promotion = $('#promotion_id').attr('data');
-                promotion = JSON.parse(promotion)
+            if($('#promotion').length && $(tr).next().attr('promotion') == 'true'){
+                // var promotion = $('.promotion_id').attr('data');
+                // promotion = JSON.parse(promotion)
                 if(promotion['discount_type'] == 'PRODUCT'){
                     if(promotion['product_type'] == 'SAME'){
                         var buy = promotion['buy']
@@ -489,32 +527,68 @@ if (isset($_GET['id'])) {
             $(tr).find('.product_total').text(parseFloat(total).toLocaleString())
             calc_product()                            
             if($(tr).next().attr('promotion') != 'true')
-                checkPromo(tr, id, name)
+                checkPromo(tr, id, name, category_id)
         }
         
-        function checkPromo(tr, id, name, attr="", attribute_id=""){
-            if($('#promotion_id').length){
-                var promotion = $('#promotion_id').attr('data');
-                promotion = JSON.parse(promotion)
-                if(promotion['discount_type'] == 'PRODUCT'){
-                    if(promotion['product_type'] == 'SAME' && promotion['buy'] <= $(tr).find('[name="product_qty[]"]').val()){
-                        var trPromo = $($('noscript#product-clone').html()).clone()
-                        trPromo.find('td:last-child').find('button').remove()
-                        trPromo.find('input[name="product_id[]"]').val(id)
-                        trPromo.find('input[name="product_price[]"]').val(0)
-                        trPromo.find('.product_name').text(name)
-                        trPromo.find('.attribute_name').html(attr)
-                        trPromo.find('input[name="attribute_id[]"]').val(attribute_id)
-                        trPromo.find('.product_price').text('x ' + 0)
-                        trPromo.find('.product_total').text(0)
-                        trPromo.attr('promotion', true)
-                        $('#product-list tbody').append(trPromo)
-                        calc_product()
-                        trPromo.find('.quantity').html('<span class="qtytext">1</span><input type="hidden" class="form-control form-control-sm rounded-0 text-center" min="0" name="product_qty[]" value="1" required>')
-                        $('#notes .alert').html(promotion['name'])
-                        $('#notes').removeClass('d-none')
+        function checkPromo(tr, id, name, category_id, attr="", attribute_id=""){
+            if($('#promotion').length){
+                var arrPromo = {}
+                $('#promotion').find('.promotion-item').each(function(i, j){
+                    //arrPromo.push($(j).attr('data'))
+                    var promotion = $(j).find('.promo').attr('data')
+                    promotion = JSON.parse(promotion)
+                    //danh mục mua gì tặng đó
+                    var category_apply = promotion['category_apply']
+                    var product_gift = promotion['product_ids']
+                    if(promotion['discount_type'] == 'PRODUCT'){
+                        if(promotion['product_type'] == 'SAME' && 
+                        promotion['buy'] <= $(tr).find('[name="product_qty[]"]').val() && 
+                        $.inArray(category_id, category_apply) > 0){
+                            var trPromo = $($('noscript#product-clone').html()).clone()
+                            trPromo.find('td:last-child').find('button').remove()
+                            trPromo.find('input[name="product_id[]"]').val(id)
+                            trPromo.find('input[name="product_price[]"]').val(0)
+                            trPromo.find('.product_name').text(name)
+                            trPromo.find('.attribute_name').html(attr)
+                            trPromo.find('input[name="attribute_id[]"]').val(attribute_id)
+                            trPromo.find('.product_price').text('x ' + 0)
+                            trPromo.find('.product_total').text(0)
+                            trPromo.attr('promotion', true)
+                            $('#product-list tbody').append(trPromo)
+                            calc_product()
+                            trPromo.find('.quantity').html('<span class="qtytext">1</span><input type="hidden" class="form-control form-control-sm rounded-0 text-center" min="0" name="product_qty[]" value="1" required>')
+                            $('#notes .alert').html(promotion['name'])
+                            $('#notes').removeClass('d-none')
+                            return false;
+                        }else if(promotion['product_type'] == 'LIST' && 
+                        promotion['buy'] <= $(tr).find('[name="product_qty[]"]').val() && 
+                        $.inArray(category_id, category_apply) > 0){
+                            var productList = $(j).find('.promo').attr('data-product')
+                            var htmlPr = ''
+                            $.each(JSON.parse(productList), function(k, r){
+                                htmlPr += '<option value="'+k+'">'+r+'</option>';
+                            })
+                            var attrId = attribute_id.split(',')
+                            var attrName = attr.split(',')
+                            var trPromo = $($('noscript#product-clone-2').html()).clone()
+                            trPromo.find('td:last-child').find('button').remove()
+                            trPromo.find('select[name="product_id[]"]').html(htmlPr)
+                            trPromo.find('input[name="product_price[]"]').val(0)
+                            trPromo.find('.product_name').text(name)
+                            trPromo.find('.attribute_name').html(attrName[0])
+                            trPromo.find('input[name="attribute_id[]"]').val(attrId[0])
+                            trPromo.find('.product_price').text('x ' + 0)
+                            trPromo.find('.product_total').text(0)
+                            trPromo.attr('promotion', true)
+                            $('#product-list tbody').append(trPromo)
+                            calc_product()
+                            trPromo.find('.quantity').html('<span class="qtytext">1</span><input type="hidden" class="form-control form-control-sm rounded-0 text-center" min="0" name="product_qty[]" value="1" required>')
+                            $('#notes .alert').html(promotion['name'])
+                            $('#notes').removeClass('d-none')
+                            return false;
+                        }
                     }
-                }
+                })
             }
         }
 
@@ -525,13 +599,15 @@ if (isset($_GET['id'])) {
                 var id = $('#productId').val()
                 var price = $('#totalCart').attr('data-total_price')
                 var name = $('#productName').val() 
+                var category_id = $('#categoryId').val();
             }else{
                 var id = $(el).attr('data-id')
                 var price = $(el).attr('data-price')
-                var name = $(el).attr('menu-name').trim()   
+                var name = $(el).attr('menu-name').trim()  
+                var category_id = $(el).attr('data-category_id'); 
             }
             if(upsize > 0){
-                uni_modal("Thêm món mới", "sales/select_menu.php?id=" + id +"&price="+price+"&upsize="+upsize+"&name=" + name, 'modal-sm');
+                uni_modal("Thêm món mới", "sales/select_menu.php?id=" + id +"&category_id="+category_id+"&price="+price+"&upsize="+upsize+"&name=" + name, 'modal-sm');
                 return false;
             }  
             // if ($('#product-list tbody tr input[name="product_id[]"][value="' + id + '"]').length > 0) {
@@ -559,13 +635,13 @@ if (isset($_GET['id'])) {
                 }
             })
             tr.find('.btn-plus').click(function(){
-                changeQty(tr, 'plus', name)
+                changeQty(tr, 'plus', name, category_id)
             })
             tr.find('.btn-minus').click(function(){
-                changeQty(tr, 'minus', name)
+                changeQty(tr, 'minus', name, category_id)
             })
             tr.find('[name="product_qty[]"]').on('input change', function() {
-                changeQty(tr, 'change', name)
+                changeQty(tr, 'change', name, category_id)
             })
             calc_product()
             
@@ -575,9 +651,21 @@ if (isset($_GET['id'])) {
                 attribute_id = $('#productAttrId').val()
                 tr.find('input[name="attribute_id[]"]').val(attribute_id)
                 tr.find('.attribute_name').html(attribute_name)
-                checkPromo(tr, id, name, attribute_name, attribute_id)
+                checkPromo(tr, id, name, category_id, attribute_name, attribute_id)
             }else{                       
-                checkPromo(tr, id, name)
+                checkPromo(tr, id, name, category_id)
+            }
+            if($('.productList').length){
+                $('.productList').change(function(){
+                    var product = $(this).val()
+                    if(!$('#product-' + product).find('button').attr('data-has_attribute')){
+                        $(this).parent().find('i').hide()
+                        $(this).closest('tr').find('input[name="attribute_id[]"]').val('')
+                    }else{
+                        $(this).next().show()
+                        $(this).closest('tr').find('input[name="attribute_id[]"]').val(attribute_id)
+                    }
+                })
             }
         }
 
