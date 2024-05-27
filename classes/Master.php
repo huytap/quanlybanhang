@@ -152,6 +152,10 @@ Class Master extends DBConnection {
 		// if(isset($_POST['price']) && count($_POST['price']) > 1){
 		// 	unset($_POST['price']);
 		// }
+		if(isset($_POST['attribute_category'])){
+			$data .= "`attribute_category`='".json_encode($_POST['attribute_category'])."'";
+			unset($_POST['attribute_category']);
+		}
 		foreach($_POST as $k =>$v){
 			if(!in_array($k,array('id'))){
 				if(!empty($data)) $data .=",";
@@ -293,8 +297,11 @@ Class Master extends DBConnection {
 			$data .= ", `status`=0 ";
 		}
 		if(empty($id)){
+			$data .= ',date_created="'.date('Y-m-d H:i:s').'"';
+			$data .= ',date_updated="'.date('Y-m-d H:i:s').'"';
 			$sql = "INSERT INTO `sale_list` set {$data} ";
 		}else{
+			$data .= ',date_updated="'.date('Y-m-d H:i:s').'"';
 			$sql = "UPDATE `sale_list` set {$data} where id = '{$id}' ";
 		}
 			$save = $this->conn->query($sql);
@@ -346,7 +353,8 @@ Class Master extends DBConnection {
 	}
 	function delete_sale(){
 		extract($_POST);
-		$del = $this->conn->query("DELETE FROM `sale_list` where id = '{$id}'");
+		$del = $this->conn->query("UPDATE `sale_list` set `deleted_flag` = 1 where id = '{$id}'");
+		//$del = $this->conn->query("DELETE FROM `sale_list` where id = '{$id}'");
 		if($del){
 			$resp['status'] = 'success';
 			$this->settings->set_flashdata('success'," Sale successfully deleted.");

@@ -143,7 +143,7 @@ if (isset($_GET['id'])) {
                             <div class="d-flex w-100 align-items-center">
                                 <div class="col-4">Tiền khách đưa:</div>
                                 <div class="col-8">
-                                    <input type="text" pattern="[0-9\.]*$" class="form-control form-control-lg rounded-0 text-right" id="tendered" name="tendered" value="<?= isset($tendered) ? number_format($tendered) : '0' ?>" required />
+                                    <input type="text" pattern="[0-9\.]*$" class="form-control form-control-lg rounded-0 text-right" id="tendered" name="tendered" value="" required />
                                 </div>
                             </div>
                             <div class="d-flex w-100 align-items-center">
@@ -156,9 +156,10 @@ if (isset($_GET['id'])) {
                                 <div class="col-4">Phương thức thanh toán:</div>
                                 <div class="col-8">
                                     <select name="payment_type" id="payment_type" class="form-control rounded-0" required="required">
+                                        <option value="">Chọn hình thức thanh toán</option>
                                         <?php
                                         foreach (PAYMENT_METHOD as $k => $p) {
-                                            echo '<option value="' . $k . '"' . (isset($payment_type) && $payment_type == 1 ? "selected" : "") . '>' . $p . '</option>';
+                                            echo '<option value="' . $k . '"' . (isset($payment_type) && $payment_type == $k ? "selected" : "") . '>' . $p . '</option>';
                                         } ?>
                                     </select>
                                 </div>
@@ -189,12 +190,12 @@ if (isset($_GET['id'])) {
             <div class="row justify-content-center">
                 <?php
                 $today = date('Y-m-d');
-                if ($today <= $date_created && $status != '1') { ?>
+                //if ($today <= $date_created && $status != '1') { ?>
                     <a class="btn btn-primary bg-gradient-primary border col-lg-3 col-md-4 col-sm-12 col-xs-12 rounded-pill" href="./?page=sales/manage_sale&id=<?= isset($id) ? $id : '' ?>"><i class="fa fa-edit"></i> Chỉnh sửa</a>
-                <?php } ?>
+                <?php //} ?>
                 <button class="btn btn-light bg-gradient-light border col-lg-3 col-md-4 col-sm-12 col-xs-12 rounded-pill" id="print"><i class="fa fa-print"></i> In đơn</button>
                 <?php
-                if ($today <= $date_created && $status != '1') { ?>
+                if ($today <= $date_created && $status == '0') { ?>
                     <button class="btn btn-danger bg-gradient-danger border col-lg-3 col-md-4 col-sm-12 col-xs-12 rounded-pill" id="delete_sale" type="button"><i class="fa fa-trash"></i> Hủy đơn</button>
                 <?php } ?>
             </div>
@@ -285,6 +286,7 @@ if (isset($_GET['id'])) {
                 setTimeout(() => {
                     nw.close()
                     end_loader()
+                    location.href = '<?php echo base_url ;?>/admin/?page=sales/index'
                 }, 300)
             }, 500)
         })

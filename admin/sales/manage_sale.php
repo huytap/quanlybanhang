@@ -48,6 +48,14 @@ if (isset($_GET['id'])) {
     .btn-plus{
         right:0;
     }
+    input[type="text"]{
+        height: 30px;
+        color:#000;
+    }
+    input[name="tendered"]{
+        background: red;
+        color:#fff;
+    }
 </style>
 <div class="content">
     <div class="container-fluid">
@@ -160,7 +168,7 @@ if (isset($_GET['id'])) {
                                                                         <div class="card text-dark text-decoration-none">
                                                                             <div class="card-body text-center">
                                                                                 <div class="text-uppercase menu-name mb-2"><?= $row['name'] ?></div>
-                                                                                <button data-has_attribute="<?=$row['upsize'];?>" data-upsize="<?=$row["upsize"];?>" menu-name="<?= $row['name'] ?>" type="button" data-price="<?= $row['price'] ?>" data-category_id="<?php echo $k;?>" data-id="<?= $row['id'] ?>" class="btn btn-primary prod-item"><span class="fa fa-plus"></span></button>
+                                                                                <button data-has_attribute="<?=$row['upsize'];?>" data-attr_category='<?=$row['attribute_category'];?>' data-upsize="<?=$row["upsize"];?>" menu-name="<?= $row['name'] ?>" type="button" data-price="<?= $row['price'] ?>" data-category_id="<?php echo $k;?>" data-id="<?= $row['id'] ?>" class="btn btn-primary prod-item"><span class="fa fa-plus"></span></button>
                                                                             </div>
                                                                         </div>
                                                                     </div>
@@ -177,7 +185,7 @@ if (isset($_GET['id'])) {
                                         <!-- /.card -->
                                     </div>
                                 </div>
-                                <div class="col-4 h-60">
+                                <div class="col-4" style="height: 80%">
                                     <table class="table table-bordered table-striped mb-0">
                                         <colgroup>
                                             <col width="35%">
@@ -216,8 +224,10 @@ if (isset($_GET['id'])) {
                                                         left join `promotion` pr on pr.id=s.promotion_id
                                                         where sp.sale_id = '{$id}'";
                                                     $sp_query = $conn->query($sql);
+                                                    $total = 0;
                                                     while ($row = $sp_query->fetch_assoc()) :
                                                         $promotion_name = $row['pr_name'];
+                                                        $total += $row['qty'];
                                                     ?>
                                                         <tr <?php if($row['promotion_id']>0 && $row['price'] <= 0) echo 'promotion="true"';?>>
                                                             <td class="px-2 py-1 align-middle" style="line-height:.9em">
@@ -260,7 +270,7 @@ if (isset($_GET['id'])) {
                                                                 </div>
                                                             </td>
                                                             <td class="px-2 py-1 align-middle text-right product_total">
-                                                                <?= format_num($row['price'] * $row['qty']) ?>
+                                                                <?= number_format($row['price'] * $row['qty']) ?>
                                                             </td>
                                                             <td class="px-2 py-1 align-middle text-center">
                                                                 <?php 
@@ -280,8 +290,12 @@ if (isset($_GET['id'])) {
                                         </div>
                                     </div>
                                     <div class="text-light w-100 mt-1 d-flex" id="summary">
+                                        <div class="col-auto">Tổng SL:</div>
+                                        <div class="col-auto flex-shrink-1 flex-grow-1 truncate-1 text-right" id="total"><?= isset($total) ? number_format($total, 0) : '0' ?></div>
+                                    </div>
+                                    <div class="text-light w-100 mt-1 d-flex" id="summary">
                                         <div class="col-auto">Tổng tiền:</div>
-                                        <div class="col-auto flex-shrink-1 flex-grow-1 truncate-1 text-right" id="amount"><?= isset($amount) ? format_num($amount, 0) : '0.00' ?></div>
+                                        <div class="col-auto flex-shrink-1 flex-grow-1 truncate-1 text-right" id="amount"><?= isset($amount) ? number_format($amount, 0) : '0' ?></div>
                                     </div>
                                     <div class="d-flex w-100 align-items-center mt-2">
                                         <div class="col-4">Đặt:</div>
@@ -294,20 +308,20 @@ if (isset($_GET['id'])) {
                                             </select>
                                         </div>
                                     </div>
-                                    <!-- <div class="d-flex w-100 align-items-center">
-                                        <div class="col-4">Đã nhận:</div>
+                                    <div class="d-flex w-100 align-items-center">
+                                        <div class="col-4">Tiền khách đưa:</div>
                                         <div class="col-8">
-                                            <input type="text" pattern="[0-9\.]*$" class="form-control form-control-lg rounded-0 text-right" id="tendered" name="tendered" value="<?= isset($tendered) ? str_replace(",", "", number_format($tendered)) : '0' ?>" required />
+                                            <input type="text" pattern="[0-9\.]*$" class="form-control form-control-lg rounded-0 text-right"  id="tendered" name="tendered" value="<?= isset($tendered) ? number_format($tendered) : '0' ?>"  autocomplete="off" />
                                         </div>
                                     </div>
                                     <div class="d-flex w-100 align-items-center">
                                         <div class="col-4">Tiền thừa:</div>
                                         <div class="col-8">
-                                            <input type="text" pattern="[0-9\.]*$" class="form-control form-control-lg rounded-0 text-right" id="change" value="<?= isset($amount) && isset($tendered) ? format_num($tendered - $amount, 0) : '0' ?>" readonly />
+                                            <input type="text" pattern="[0-9\.]*$" class="form-control form-control-lg rounded-0 text-right" id="change" value="<?= isset($amount) && isset($tendered) ? number_format($tendered - $amount, 0) : '0' ?>" readonly />
                                         </div>
                                     </div>
                                     <div class="d-flex w-100 align-items-center">
-                                        <div class="col-4">Phương thức thanh toán:</div>
+                                        <div class="col-4">Hình thức TT:</div>
                                         <div class="col-8">
                                             <select name="payment_type" id="payment_type" class="form-control rounded-0" required="required">
                                                 <option value="1" <?= isset($payment_type) && $payment_type == 1 ? "selected" : "" ?>>Tiền mặt</option>
@@ -316,7 +330,7 @@ if (isset($_GET['id'])) {
                                             </select>
                                         </div>
                                     </div>
-                                    <div id="no_receive_change" style="display: <?php if(isset($tendered) && $tendered > 0) echo 'block';else echo 'none';?>">
+                                    <!-- <div id="no_receive_change" style="display: <?php if(isset($tendered) && $tendered > 0) echo 'block';else echo 'none';?>">
                                         <input type="text" id="payment_code" class="form-control form-control-sm rounded-0 d-none" name="payment_code" value="<?= isset($payment_code) ? $payment_code : "" ?>" placeholder="Số tham chiếu">
                                         <input type="checkbox" name="" id=""> Không lấy tiền thừa
                                     </div> -->
@@ -375,7 +389,6 @@ if (isset($_GET['id'])) {
             <p class="m-0"><small class="product_price">x 20,000đ</small></p>
         </td>
         <td class="px-2 py-1 align-middle">
-            <input type="hidden" name="product_id[]">
             <input type="hidden" name="product_price[]">
             <input type="hidden" name="attribute_id[]">
             <div class="quantity text-center">
@@ -409,13 +422,16 @@ if (isset($_GET['id'])) {
 
     function calc_total_amount() {
         var total = 0;
+        var totalAmount = 0;
         $('#product-list tbody tr').each(function() {
             var qty = $(this).find('[name="product_qty[]"]').val()
             qty = qty > 0 ? qty : 0
-            total += (parseFloat($(this).find('[name="product_price[]"]').val()) * parseFloat(qty))
+            totalAmount += (parseFloat($(this).find('[name="product_price[]"]').val()) * parseInt(qty))
+            total += parseInt(qty)
         })
-        $('[name="amount"]').val(parseFloat(total))
-        $('#amount').text(parseFloat(total).toLocaleString('vi-VN'))
+        $('[name="amount"]').val(parseFloat(totalAmount))
+        $('#amount').text(parseFloat(totalAmount).toLocaleString('vi-VN'))
+        $('#total').text(parseInt(total).toLocaleString('vi-VN'))
         calc_change()
     }
 
@@ -440,9 +456,9 @@ if (isset($_GET['id'])) {
         //         $('#payment_code').removeClass('d-none').attr('required', true)
         //     }
         // })
-        // $('#tendered').on('input', function() {
-        //     calc_change()
-        // })
+        $('#tendered').on('input', function() {
+            calc_change()
+        })
         itemInCart()
         $('#submit').click(function(){
             $('#uni_modal').modal('hide')
@@ -600,13 +616,18 @@ if (isset($_GET['id'])) {
                 var price = $('#totalCart').attr('data-total_price')
                 var name = $('#productName').val() 
                 var category_id = $('#categoryId').val();
+                var attr_category = $('#attrCategory').val();
             }else{
                 var id = $(el).attr('data-id')
                 var price = $(el).attr('data-price')
                 var name = $(el).attr('menu-name').trim()  
                 var category_id = $(el).attr('data-category_id'); 
+                var attr_category = $(el).attr('data-attr_category');
             }
-            if(upsize > 0){
+            if(attr_category){
+                attr_category = JSON.parse(attr_category)
+            }
+            if(upsize > 0 || (attr_category.length && el != 'submit')){
                 uni_modal("Thêm món mới", "sales/select_menu.php?id=" + id +"&category_id="+category_id+"&price="+price+"&upsize="+upsize+"&name=" + name, 'modal-sm');
                 return false;
             }  
@@ -652,6 +673,8 @@ if (isset($_GET['id'])) {
                 tr.find('input[name="attribute_id[]"]').val(attribute_id)
                 tr.find('.attribute_name').html(attribute_name)
                 checkPromo(tr, id, name, category_id, attribute_name, attribute_id)
+                $('#attrName').val('')
+                $('#productAttrId').val('')
             }else{                       
                 checkPromo(tr, id, name, category_id)
             }

@@ -66,6 +66,23 @@ if (isset($_GET['id']) && $_GET['id'] > 0) {
 				}	
 			}		
 			?>
+		</div>		
+		<div class="form-group">
+			<label for="attribute_category" class="control-label">Thuộc tính áp dụng</label>
+			<br>
+			<?php
+			$cate = json_decode($attribute_category, true);
+			foreach(ATTR as $k => $n){
+				echo '<div class="form-check-inline">
+								<label class="form-check-label">';
+				if($cate && in_array($k, $cate)){
+					echo '<input type="checkbox" class="form-check-input" name="attribute_category[]" checked="checked" value="'.$k.'">';
+				}else{
+					echo '<input type="checkbox" class="form-check-input" name="attribute_category[]" value="'.$k.'">';
+				}
+				echo $n.'</label></div>';
+			}
+				?>
 		</div>
 		<div class="form-group">
 			<label for="status" class="control-label">Trạng thái</label>

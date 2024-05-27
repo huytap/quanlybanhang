@@ -1,7 +1,9 @@
 <?php
 const ATTR = [
     0 => 'Size',
-    1 => 'Topping'
+    1 => 'Topping',
+    2 => 'Mức đá',
+    3 => 'Mức đường',
 ];
 const PROMOTION_TYPE = [
     'PERCENT' => 'Giảm %',
@@ -24,6 +26,7 @@ const DRINK = [
     'MANG ĐI',
     'ONLINE'
 ];
+date_default_timezone_set("Asia/Ho_Chi_Minh");
 $dev_data = array('id'=>'-1','firstname'=>'Developer','lastname'=>'','username'=>'dev_oretnom','password'=>'5da283a2d990e8d8512cf967df5bc0d0','last_login'=>'','date_updated'=>'','date_added'=>'');
 if(!defined('base_url')) define('base_url','http://localhost/quanlybanhang/');
 if(!defined('base_app')) define('base_app', str_replace('\\','/',__DIR__).'/' );
