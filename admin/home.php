@@ -5,11 +5,18 @@
     <div class="info-box">
       <span class="info-box-icon bg-gradient-light elevation-1"><i class="fas fa-th-list"></i></span>
       <div class="info-box-content">
-        <span class="info-box-text">Danh mục</span>
+        <span class="info-box-text">Tổng số món trong ngày</span>
         <span class="info-box-number text-right">
           <?php
-          $category = $conn->query("SELECT * FROM category_list where delete_flag = 0 and `status` = 1")->num_rows;
-          echo format_num($category);
+          $date = date('Y-m-d');
+          //$date = '2024-05-30';
+          $sql = "SELECT id 
+                  FROM `sale_list` as s
+                  LEFT JOIN `sale_products` as sp ON sp.sale_id=s.id
+                  WHERE deleted_flag=0 and date(date_created) = '{$date}'";
+          $qry = $conn->query($sql)->num_rows;
+          //$category = $conn->query("SELECT * FROM category_list where delete_flag = 0 and `status` = 1")->num_rows;
+          echo number_format($qry);
           ?>
           <?php ?>
         </span>

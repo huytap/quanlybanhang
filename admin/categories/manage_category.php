@@ -29,6 +29,13 @@ if (isset($_GET['id']) && $_GET['id'] > 0) {
 			</select>
 		</div>
 		<div class="form-group">
+			<label for="has_print_tem" class="control-label">Có in tem không</label>
+			<select name="has_print_tem" id="has_print_tem" class="form-control form-control-sm rounded-0" required>
+				<option value="1" <?php echo isset($has_print_tem) && $has_print_tem == 1 ? 'selected' : '' ?>>Có</option>
+				<option value="0" <?php echo isset($has_print_tem) && $has_print_tem == 0 ? 'selected' : '' ?>>Không</option>
+			</select>
+		</div>
+		<div class="form-group">
 			<label for="status" class="control-label">Trạng thái</label>
 			<select name="status" id="status" class="form-control form-control-sm rounded-0" required>
 				<option value="1" <?php echo isset($status) && $status == 1 ? 'selected' : '' ?>>Hoạt động</option>

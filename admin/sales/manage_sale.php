@@ -248,7 +248,7 @@ if (isset($_GET['id'])) {
                                                                     echo  '</i>';
                                                                 } 
                                                                 ?>
-                                                                <p class="m-0"><small class="product_price">x <?= format_num($row['price']) ?></small></p>
+                                                                <p class="m-0"><small class="product_price">x <?= number_format($row['price']) ?></small></p>
                                                             </td>
                                                             <td class="px-2 py-1 align-middle">
                                                                 <input type="hidden" name="product_id[]" value="<?= $row['product_id'] ?>">
@@ -430,8 +430,8 @@ if (isset($_GET['id'])) {
             total += parseInt(qty)
         })
         $('[name="amount"]').val(parseFloat(totalAmount))
-        $('#amount').text(parseFloat(totalAmount).toLocaleString('vi-VN'))
-        $('#total').text(parseInt(total).toLocaleString('vi-VN'))
+        $('#amount').text(parseFloat(totalAmount).toLocaleString('en-US'))
+        $('#total').text(parseInt(total).toLocaleString('en-US'))
         calc_change()
     }
 
@@ -443,7 +443,7 @@ if (isset($_GET['id'])) {
             qty = qty > 0 ? qty : 0
             total += (parseFloat($(this).find('[name="product_price[]"]').val()) * parseFloat(qty))
         })
-        $('#product_total').text(parseFloat(total).toLocaleString('vi-VN'))
+        $('#product_total').text(parseFloat(total).toLocaleString('en-US'))
         calc_total_amount()
     }
     $(function() {
@@ -456,7 +456,8 @@ if (isset($_GET['id'])) {
         //         $('#payment_code').removeClass('d-none').attr('required', true)
         //     }
         // })
-        $('#tendered').on('input', function() {
+        $('#tendered').on('input', function() {            
+            //$(this).val(parseFloat($(this).val()).toLocaleString('en-US'))
             calc_change()
         })
         itemInCart()
@@ -557,7 +558,7 @@ if (isset($_GET['id'])) {
                     var category_apply = promotion['category_apply']
                     var product_gift = promotion['product_ids']
                     if(promotion['discount_type'] == 'PRODUCT'){
-                        if(promotion['product_type'] == 'SAME' && 
+                        if(promotion['product_type'] == 'SAME' && promotion['buy'] > 0 && 
                         promotion['buy'] <= $(tr).find('[name="product_qty[]"]').val() && 
                         $.inArray(category_id, category_apply) > 0){
                             var trPromo = $($('noscript#product-clone').html()).clone()
@@ -576,9 +577,36 @@ if (isset($_GET['id'])) {
                             $('#notes .alert').html(promotion['name'])
                             $('#notes').removeClass('d-none')
                             return false;
-                        }else if(promotion['product_type'] == 'LIST' && 
+                        }else if(promotion['product_type'] == 'LIST' && promotion['buy'] > 0 &&
                         promotion['buy'] <= $(tr).find('[name="product_qty[]"]').val() && 
                         $.inArray(category_id, category_apply) > 0){
+                            var productList = $(j).find('.promo').attr('data-product')
+                            var htmlPr = ''
+                            $.each(JSON.parse(productList), function(k, r){
+                                htmlPr += '<option value="'+k+'">'+r+'</option>';
+                            })
+                            var attrId = attribute_id.split(',')
+                            var attrName = attr.split(',')
+                            var trPromo = $($('noscript#product-clone-2').html()).clone()
+                            trPromo.find('td:last-child').find('button').remove()
+                            trPromo.find('select[name="product_id[]"]').html(htmlPr)
+                            trPromo.find('input[name="product_price[]"]').val(0)
+                            trPromo.find('.product_name').text(name)
+                            trPromo.find('.attribute_name').html(attrName[0])
+                            trPromo.find('input[name="attribute_id[]"]').val(attrId[0])
+                            trPromo.find('.product_price').text('x ' + 0)
+                            trPromo.find('.product_total').text(0)
+                            trPromo.attr('promotion', true)
+                            $('#product-list tbody').append(trPromo)
+                            calc_product()
+                            trPromo.find('.quantity').html('<span class="qtytext">1</span><input type="hidden" class="form-control form-control-sm rounded-0 text-center" min="0" name="product_qty[]" value="1" required>')
+                            $('#notes .alert').html(promotion['name'])
+                            $('#notes').removeClass('d-none')
+                            return false;
+                        }else if(promotion['product_type'] == 'LIST' && promotion['min_amount'] > 0 &&
+                        promotion['min_amount'] <= parseFloat($('#amount').text().replace(',', '')) && 
+                        $.inArray(category_id, category_apply) > 0 && !$('#product-list').hasClass('promotion')){
+                            $('#product-list').addClass('promotion')
                             var productList = $(j).find('.promo').attr('data-product')
                             var htmlPr = ''
                             $.each(JSON.parse(productList), function(k, r){

@@ -27,7 +27,7 @@ if (isset($_GET['id']) && $_GET['id'] > 0) {
                                 <div class="col-10">
                                     <b class="attr-name"><?php echo $res['name']; ?></b>
                                     <?php if ($res['price'] > 0) { ?> -
-                                        <?php if (isset($_GET['upsize']) && $_GET['upsize'] > 0) {
+                                        <?php if (isset($_GET['upsize']) && $_GET['upsize'] > 0 && $K == 0) {
                                             echo number_format($res['price'] * $_GET['upsize']);
                                         } else {
                                             echo number_format($res['price']); ?>đ
@@ -43,10 +43,10 @@ if (isset($_GET['id']) && $_GET['id'] > 0) {
                                             $checked = '';
                                         }
                                     ?>
-                                        <input data-name="<?php echo $res['name']; ?>" data-price="<?= $res['price'] * ($_GET['upsize'] ? $_GET['upsize'] : 1); ?>" <?= $checked; ?> class="checkbox chose-size" type="checkbox" name="extra[0]" value="<?php echo $res['id']; ?>">
+                                        <input data-name="<?php echo $res['name']; ?>" data-price="<?= $res['price'] * (($_GET['upsize'] && $K == 0) ? $_GET['upsize'] : 1); ?>" <?= $checked; ?> class="checkbox chose-size" type="checkbox" name="extra[0]" value="<?php echo $res['id']; ?>">
                                     <?php
                                     } else { ?>
-                                        <input data-name="<?php echo $res['name']; ?>" data-price="<?= $res['price'] * ($_GET['upsize'] ? $_GET['upsize'] : 1); ?>" class="checkbox choose-topping" type="checkbox" name="extra[<?php echo $res['type']; ?>][]" value="<?php echo $res['id']; ?>">
+                                        <input data-name="<?php echo $res['name']; ?>" data-price="<?= $res['price'] * (($_GET['upsize'] && $K == 0) ? $_GET['upsize'] : 1); ?>" class="checkbox choose-topping" type="checkbox" name="extra[<?php echo $res['type']; ?>][]" value="<?php echo $res['id']; ?>">
                                     <?php
                                     }
                                     ?>

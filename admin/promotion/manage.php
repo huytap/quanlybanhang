@@ -105,7 +105,7 @@ if (isset($_GET['id']) && $_GET['id'] > 0) {
 		</div>
 		<div class="form-group">
 			<label for="min_amount" class="control-label">Áp dụng cho đơn hàng giá trị tối thiểu</label>
-			<input type="number" name="min_amount" id="min_amount" class="form-control form-control-sm rounded-0 text-right" value="<?php echo isset($discount) ? $discount : ''; ?>" required />
+			<input type="number" name="min_amount" id="min_amount" class="form-control form-control-sm rounded-0 text-right" value="<?php echo isset($min_amount) ? $min_amount : ''; ?>" required />
 		</div>
 		<div id="quantity_product" class="<?php if(isset($discount_type) && $discount_type == 'PRODUCT') echo '';else echo 'd-none';?>">
 			<div class="form-group">

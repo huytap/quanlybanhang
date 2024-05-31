@@ -1,7 +1,7 @@
 <?php
 ob_start();
-ini_set('date.timezone','Asia/Manila');
-date_default_timezone_set('Asia/Manila');
+ini_set('date.timezone','Asia/Ho_Chi_Minh');
+date_default_timezone_set('Asia/Ho_Chi_Minh');
 session_start();
 
 require_once('initialize.php');

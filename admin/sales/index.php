@@ -7,7 +7,7 @@
 	<div class="card-header">
 		<h3 class="card-title">Bán hàng</h3>
 		<div class="card-tools">
-			<a href="./?page=sales/manage_sale" id="create_new" class="btn btn-flat btn-primary"><span class="fas fa-plus"></span> Tạo mới</a>
+			<a href="./?page=sales/manage_sale" id="create_new" class="btn btn-flat btn-primary"><span class="fas fa-plus"></span> Tạo đơn mới</a>
 		</div>
 	</div>
 	<div class="card-body">
@@ -17,8 +17,8 @@
 					<colgroup>
 						<col width="5%">
 						<col width="20%">
-						<col width="20%">
-						<col width="25%">
+						<col width="10%">
+						<col width="15%">
 						<col width="15%">
 						<col width="15%">
 					</colgroup>
@@ -28,6 +28,7 @@
 							<th>Ngày bán</th>
 							<th>Số HĐ</th>
 							<th>Khách hàng</th>
+							<th>Hình thức TT</th>
 							<th>Tiền</th>
 							<th>Trạng thái</th>
 							<th>#</th>
@@ -54,6 +55,9 @@
 								<td>
 									<p class="m-0 truncate-1"><?= $row['client_name'] ?></p>
 								</td>
+								<td>
+                                	<p class="m-0"><?= PAYMENT_METHOD[$row['payment_type']] ?></p>
+                                </td>
 								<td class='text-right'><?= format_num($row['amount'], 0) ?></td>
 								<td class="text-center">
 									<?php 

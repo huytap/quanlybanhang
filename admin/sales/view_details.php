@@ -20,6 +20,7 @@ if (isset($_GET['id'])) {
 } else {
     echo '<script> alert("sale\'s ID is required to access the page."); location.replace("./?page=sales"); </script>';
 }
+$tem_html = '';
 ?>
 <div class="content py-3">
     <div class="card card-outline card-navy rounded-0 shadow">
@@ -42,6 +43,14 @@ if (isset($_GET['id'])) {
                                     <b>Ngày:</b> <?= isset($date_created) ? date("d/m/Y h:i", strtotime($date_created)) : "" ?>
                                 </div>
                             </div>
+                            <div class="d-flex invoice-no">
+                                <div class="col-6">
+                                    <b>Khách hàng:</b> <?php echo $client_name;?>
+                                </div>
+                                <div class="col-6">
+                                    <b>SĐT:</b> <?= isset($phone_number) ? $phone_number : "" ?>
+                                </div>
+                            </div>
                             <div class="mb-2"></div>
                             <h6 class="d-flex border-bottom border-dark pb-1">
                                 <div class="col-8">Thực đơn</div>
@@ -50,44 +59,79 @@ if (isset($_GET['id'])) {
                             </h6>
                             <?php if (isset($id)) : ?>
                                 <?php
-                                $sql = "SELECT sp.*, pr.name as pr_name, p.name as `product`, s.promotion_id, attribute_id
+                                $sql = "SELECT sp.*, s.code, pr.name as pr_name, p.name as `product`, s.promotion_id, sp.attribute_id, c.has_print_tem
                                     FROM `sale_products` sp 
                                     left join `sale_list` s on s.id=sp.sale_id
                                     inner join `product_list` p on sp.product_id =p.id 
+                                    left join `category_list` c on c.id=p.category_id
                                     left join `promotion` pr on pr.id=s.promotion_id
                                     where sp.sale_id = '{$id}'";
                                 $sp_query = $conn->query($sql);
                                 $promotion_name = '';
+                                $stt = 1;
+                                $arrayTemp = [];
+                                $totalQty = 0;
+                                if($sp_query->num_rows > 0)
                                 //$sp_query = $conn->query("SELECT sp.*, p.name as `product` FROM `sale_products` sp inner join `product_list` p on sp.product_id =p.id where sp.sale_id = '{$id}'");
                                 while ($row = $sp_query->fetch_assoc()) :
                                     $promotion_name = $row['pr_name'];
+                                    if($row['has_print_tem'] == 1){
+                                        $totalQty += $row['qty'];
+                                        //$tem_html .= '<h6>'.$row['product'].'</h6>';
+                                        $arrayTemp[$stt] = [
+                                            'name' => $row['product'],
+                                            'code' => $row['code'],
+                                            'price' => number_format($row['price'], 0),
+                                            'quantity' => $row['qty']
+                                        ];
+                                    }
                                 ?>
                                     <div class="d-flex border-bottom border-dark mb-1 pb-1">
                                         <div class="col-8" style="line-height:.9em">
                                             <p class="m-0"><?= $row['product'] ?></p>
                                             <?php
+                                            $attrStr = '';
                                             if ($row['attribute_id'] != '') {
                                                 echo '<i style="display:block;font-size:11px;" class="attribute_name">';
                                                 $attr_query = "SELECT `name` FROM `attributes` where id in({$row['attribute_id']}) AND delete_flag=0";
                                                 $q = $conn->query($attr_query);
                                                 $r = 0;
+                                                // if($q->num_rows){
+                                                //     $tem_html .= '<i style="display:block;font-size:11px;">';
+                                                // }
                                                 while ($row2 = $q->fetch_assoc()) :
+                                                    $tem_html .= $row2['name']; 
+                                                    $attrStr .= $row2['name'];
                                                     echo $row2['name'];
                                                     if ($r < $q->num_rows - 1) {
+                                                        //$tem_html .= ', ';
+                                                        $attrStr .= ', ';
                                                         echo ', ';
                                                     }
                                                     $r++;
                                                 endwhile;
+                                                $arrayTemp[$stt]['attribute'] = $attrStr;
                                                 echo  '</i>';
+                                                // if($q->num_rows){
+                                                //     $tem_html .= '</i>';
+                                                // }
                                             }
                                             ?>
-                                            <p class="m-0"><small>x <?= format_num($row['price'], 0) ?></small></p>
+                                            <p class="m-0"><small>x <?= number_format($row['price'], 0) ?></small></p>
                                         </div>
                                         <div class="col-1 text-center"><?= $row['qty'] ?></div>
-                                        <div class="col-3 text-right"><?= format_num($row['price'] * $row['qty']) ?></div>
+                                        <div class="col-3 text-right"><?= number_format($row['price'] * $row['qty']) ?></div>
                                     </div>
-                                <?php endwhile; ?>
+                                <?php 
+                                //$tem_html .= '<p>Số HĐ: '.$row['code'] . ' - #'. $stt .'/' .$row['totalQty'].'</p>';
+                                $stt++;
+                            endwhile; 
+                            ?>
                             <?php endif; ?>
+                            <h6 class="d-flex border-dark">
+                                <div class="col-4 text-bold">Tổng SL</div>
+                                <div class="col-8 text-bold text-right"><?= isset($totalQty) ? format_num($totalQty, 0) : 0 ?></div>
+                            </h6>
                             <h6 class="d-flex border-dark">
                                 <div class="col-4 text-bold">Tổng tiền</div>
                                 <div class="col-8 text-bold text-right"><?= isset($amount) ? format_num($amount, 0) : 0 ?></div>
@@ -119,8 +163,8 @@ if (isset($_GET['id'])) {
                             <?php } ?>
                             <?php if ($promotion_name) : ?>
                                 <div id="notes" class="d-flex font-italic">
-                                    <div class="col-4">Ghi chú:</div>
-                                    <div class="col-8 text-right"><?php echo $promotion_name; ?></div>
+                                    <!-- <div class="col-4">Ghi chú:</div> -->
+                                    <div class="col-12"><?php echo $promotion_name; ?></div>
                                 </div>
                             <?php endif; ?>
                             <div class="d-flex border-dark mb-2">
@@ -190,12 +234,15 @@ if (isset($_GET['id'])) {
             <div class="row justify-content-center">
                 <?php
                 $today = date('Y-m-d');
-                //if ($today <= $date_created && $status != '1') { ?>
+                if ($today <= $date_created && $_settings->userdata('type') == 1) { ?>
                     <a class="btn btn-primary bg-gradient-primary border col-lg-3 col-md-4 col-sm-12 col-xs-12 rounded-pill" href="./?page=sales/manage_sale&id=<?= isset($id) ? $id : '' ?>"><i class="fa fa-edit"></i> Chỉnh sửa</a>
-                <?php //} ?>
+                <?php } ?>
                 <button class="btn btn-light bg-gradient-light border col-lg-3 col-md-4 col-sm-12 col-xs-12 rounded-pill" id="print"><i class="fa fa-print"></i> In đơn</button>
+                <?php if($totalQty > 0){?>
+                    <button class="btn btn-light bg-gradient-light border col-lg-3 col-md-4 col-sm-12 col-xs-12 rounded-pill" id="print_tem"><i class="fa fa-print"></i> In tem</button>
                 <?php
-                if ($today <= $date_created && $status == '0') { ?>
+                }
+                if ($today <= $date_created && $_settings->userdata('type') == 1) { ?>
                     <button class="btn btn-danger bg-gradient-danger border col-lg-3 col-md-4 col-sm-12 col-xs-12 rounded-pill" id="delete_sale" type="button"><i class="fa fa-trash"></i> Hủy đơn</button>
                 <?php } ?>
             </div>
@@ -218,13 +265,13 @@ if (isset($_GET['id'])) {
             font-size: 1rem !important;
         }
 
-        .container-fluid {
+        /* .container-fluid {
             width: 100% !important;
-        }
+        } */
 
         .receipt-header,
         .receipt-content {
-            width: 104mm;
+            width: 100mm;
         }
 
         h4 {
@@ -242,6 +289,18 @@ if (isset($_GET['id'])) {
             background-color: #fff;
             border-color: #fff;
         }
+        @page {
+            size:portrait;
+            margin: 7px;
+            padding:0;
+        }
+        .btn.btn-warning{
+            background-color: transparent;
+            color:#000;
+            border-radius: 0;
+            border:0;
+            padding:0
+        }
     </style>
     <div class="d-flex receipt-header">
         <div class="col-12 text-center">
@@ -251,7 +310,83 @@ if (isset($_GET['id'])) {
             <h3 class="tex-center mt-1">HÓA ĐƠN THANH TOÁN</h3>
         </div>
     </div>
-    <hr>
+</noscript>
+<noscript id="print-header2">
+    <style>
+        html,
+        body {
+            font-family: Arial, sans-serif;
+            color: #000;
+            margin: 0;
+        }
+        .receipt-header{
+            width: 67mm;
+        }
+        .print-content{
+            height: 35mm;
+            border: 2px solid #000;
+            border-radius: 5px;
+            padding: 5px;
+        }
+        .product-info{
+            height: 22mm;
+            overflow: hidden;            
+        }
+        h6{
+            font-weight: bold;
+            font-size: 17px;
+            padding:0;
+            margin:0;
+            text-transform: uppercase;
+        }
+        @page {
+            size: landscape;
+            margin: 7px;
+            padding:0;
+        }
+        .brand{
+            font-weight: bold;
+            font-size: 13px;
+        }
+        .breakpage{
+            page-break-after: always;
+            padding-top: 7px;
+            margin-top: 7px;
+        } 
+        .attribute{
+            border-bottom: 1px dashed #000;
+        }
+       
+        
+        /* @media print { 
+            .breakpage {page-break-before: always;} 
+        }  */
+    </style>
+    <div class="receipt-header">
+        <?php
+        foreach($arrayTemp as $key => $temp){
+            for($i=0;$i<$temp['quantity'];$i++){
+            ?>
+            <div class="print-content">
+                <div class="product-info">
+                    <h6><?= $temp['name'];?></h6>
+                    <div class="attribute">
+                        <?php if(isset($temp['attribute'])){?>
+                            <div style="display:block;font-size:15px;"><?php echo $temp['attribute'];?></div>
+                        <?php }?>
+                    </div>
+                </div>
+                <div class="brand"">
+                    <div style="width: 70%;display: inline-block;">No.<?=$temp['code'] . ' #'. ($key+$i) .'/' .$totalQty;?></div><div style="display: inline-block;width: 30%; text-align:right;"><?php echo $temp['price'];?></div>
+                    SKUN- 0344 384 234
+                </div>
+            </div>
+            <?php
+            }
+        } 
+        ?>
+    </div>
+    <div class="breakpage"></div>
 </noscript>
 <script>
     $(function() {
@@ -262,20 +397,20 @@ if (isset($_GET['id'])) {
             var head = $('head').clone()
             var p = $($('#printout').html()).clone()
             var phead = $($('noscript#print-header').html()).clone()
-            var el = $('<div class="container-fluid">')
+            var el = $('<div>')
             head.find('title').text("In hóa đơn")
             el.append(phead)
             el.append(p)
-            el.find('.bg-gradient-navy').css({
-                'background': '#001f3f linear-gradient(180deg, #26415c, #001f3f) repeat-x !important',
-                'color': '#fff'
-            })
-            el.find('.bg-gradient-secondary').css({
-                'background': '#6c757d linear-gradient(180deg, #828a91, #6c757d) repeat-x !important',
-                'color': '#fff'
-            })
-            el.find('tr.bg-gradient-navy').attr('style', "color:#000")
-            el.find('tr.bg-gradient-secondary').attr('style', "color:#000")
+            // el.find('.bg-gradient-navy').css({
+            //     'background': '#001f3f linear-gradient(180deg, #26415c, #001f3f) repeat-x !important',
+            //     'color': '#fff'
+            // })
+            // el.find('.bg-gradient-secondary').css({
+            //     'background': '#6c757d linear-gradient(180deg, #828a91, #6c757d) repeat-x !important',
+            //     'color': '#fff'
+            // })
+            // el.find('tr.bg-gradient-navy').attr('style', "color:#000")
+            // el.find('tr.bg-gradient-secondary').attr('style', "color:#000")
             start_loader();
             var nw = window.open("", "_blank", "width=279")
             nw.document.querySelector('head').innerHTML = head.prop('outerHTML')
@@ -287,6 +422,25 @@ if (isset($_GET['id'])) {
                     nw.close()
                     end_loader()
                     location.href = '<?php echo base_url ;?>/admin/?page=sales/index'
+                }, 300)
+            }, 500)
+        })
+        $('#print_tem').click(function() {
+            var head = $('head').clone()
+            var phead = $($('noscript#print-header2').html()).clone()
+            var el = $('<div>')
+            head.find('title').text("In hóa đơn")
+            el.append(phead)
+            start_loader();
+            var nw = window.open("", "_blank", "width=280")
+            nw.document.querySelector('head').innerHTML = head.prop('outerHTML')
+            nw.document.querySelector('body').innerHTML = el.prop('outerHTML')
+            nw.document.close()
+            setTimeout(() => {
+                nw.print()
+                setTimeout(() => {
+                    nw.close()
+                    end_loader()
                 }, 300)
             }, 500)
         })
