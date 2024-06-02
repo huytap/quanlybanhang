@@ -44,13 +44,18 @@ $tem_html = '';
                                 </div>
                             </div>
                             <div class="d-flex invoice-no">
-                                <div class="col-6">
+                                <div class="col-sm-6">
                                     <b>Khách hàng:</b> <?php echo $client_name;?>
                                 </div>
-                                <div class="col-6">
+                                <div class="col-sm-6">
                                     <b>SĐT:</b> <?= isset($phone_number) ? $phone_number : "" ?>
                                 </div>
                             </div>
+                            <?php if(isset($time_shipping)){?>
+                                <div class="col-sm-12">
+                                    <b>Giao:</b> <?= $time_shipping ?>
+                                </div>
+                            <?php }?>
                             <div class="mb-2"></div>
                             <h6 class="d-flex border-bottom border-dark pb-1">
                                 <div class="col-8">Thực đơn</div>
@@ -70,11 +75,12 @@ $tem_html = '';
                                 $promotion_name = '';
                                 $stt = 1;
                                 $arrayTemp = [];
-                                $totalQty = 0;
+                                $totalQty = $totalSummary = 0;
                                 if($sp_query->num_rows > 0)
                                 //$sp_query = $conn->query("SELECT sp.*, p.name as `product` FROM `sale_products` sp inner join `product_list` p on sp.product_id =p.id where sp.sale_id = '{$id}'");
                                 while ($row = $sp_query->fetch_assoc()) :
                                     $promotion_name = $row['pr_name'];
+                                    $totalSummary += $row['qty'];
                                     if($row['has_print_tem'] == 1){
                                         $totalQty += $row['qty'];
                                         //$tem_html .= '<h6>'.$row['product'].'</h6>';
@@ -128,38 +134,42 @@ $tem_html = '';
                             endwhile; 
                             ?>
                             <?php endif; ?>
-                            <h6 class="d-flex border-dark">
-                                <div class="col-4 text-bold">Tổng SL</div>
-                                <div class="col-8 text-bold text-right"><?= isset($totalQty) ? format_num($totalQty, 0) : 0 ?></div>
+                            <h6 class="d-flex border-dark" style="font-size: 18px">
+                                <div class="col-8 text-bold">Tổng cộng</div>
+                                <div class="col-1 text-bold text-center"><?= isset($totalSummary) ? format_num($totalSummary, 0) : 0 ?></div>
+                                <div class="col-3 text-bold text-right"><?= isset($amount) ? format_num($amount, 0) : 0 ?></div>
                             </h6>
-                            <h6 class="d-flex border-dark">
-                                <div class="col-4 text-bold">Tổng tiền</div>
-                                <div class="col-8 text-bold text-right"><?= isset($amount) ? format_num($amount, 0) : 0 ?></div>
-                            </h6>
+                            <div class="d-flex border-dark  text-bold" style="font-size: 18px;border-top:1px solid #000;">
+                                <div class="col-7">
+                                    <?php
+                                    $payment_type = isset($payment_type) ? $payment_type : 0;
+                                    echo PAYMENT_METHOD[$payment_type];
+                                    ?>
+                                </div>
+                                <div class="col-5 text-right">
+                                <?= isset($amount) ? format_num($amount, 0) : 0 ?>
+                                </div>
+                            </div>
                             <?php if ($status == '1') { ?>
                                 <div class="d-flex">
-                                    <div class="col-5">Tiền khách đưa</div>
+                                    <div class="col-5">Khách trả</div>
                                     <div class="col-7 text-right"><?= isset($tendered) ? format_num($tendered, 0) : 0 ?></div>
                                 </div>
-                                <div class="d-flex">
-                                    <div class="col-4">Tiền thừa</div>
-                                    <div class="col-8 text-right"><?= isset($amount) && isset($tendered) ? format_num($tendered - $amount, 0) : 0 ?></div>
-                                </div>
-                                <div class="d-flex">
-                                    <div class="col-4">Hình thức TT</div>
-                                    <div class="col-8 text-right">
-                                        <?php
-                                        $payment_type = isset($payment_type) ? $payment_type : 0;
-                                        echo PAYMENT_METHOD[$payment_type];
-                                        ?>
+                                <?php
+                                    $payment_type = isset($payment_type) ? $payment_type : 0;
+                                    if($payment_type == 1){
+                                    ?>
+                                    <div class="d-flex">
+                                        <div class="col-4">Tiền thừa</div>
+                                        <div class="col-8 text-right"><?= isset($amount) && isset($tendered) ? format_num($tendered - $amount, 0) : 0 ?></div>
                                     </div>
-                                </div>
-                                <?php if ($payment_type > 1) : ?>
-                                    <h6 class="d-flex">
+                                <?php }?>
+                                <?php //if ($payment_type > 1) : ?>
+                                    <!-- <h6 class="d-flex">
                                         <div class="col-4">Số tham chiếu</div>
                                         <div class="col-8 text-right"><?= isset($payment_code) ? $payment_code : "" ?></div>
-                                    </h6>
-                                <?php endif; ?>
+                                    </h6> -->
+                                <?php //endif; ?>
                             <?php } ?>
                             <?php if ($promotion_name) : ?>
                                 <div id="notes" class="d-flex font-italic">
@@ -167,25 +177,26 @@ $tem_html = '';
                                     <div class="col-12"><?php echo $promotion_name; ?></div>
                                 </div>
                             <?php endif; ?>
-                            <div class="d-flex border-dark mb-2">
+                            <!-- <div class="d-flex border-dark mb-2">
                                 <div class="col-4">Trạng thái:</div>
                                 <div class="col-8 text-right">
                                     <?php
                                     if ($status != '1') {
-                                        echo '<span class="btn btn-warning">Chưa thanh toán</span>';
+                                        echo '<span class="btn p-0 btn-warning">Chưa thanh toán</span>';
                                     } else {
-                                        echo '<span class="btn btn-primary">Đã thanh toán</span>';
+                                        echo '<span class="btn p-0 btn-primary">Đã thanh toán</span>';
                                     } ?>
                                 </div>
-                            </div>
-                        </div>
+                            </div> -->
+                            <!-- <div class="text-bold text-center">Cảm ơn Quý khách - Hẹn gặp lại!</div> -->
+                        </div>                        
                     </div>
                     <?php if ($status != '1') { ?>
                         <form method="post" id="sale-form">
                             <input type="hidden" name="id" value="<?= isset($id) ? $id : '' ?>">
                             <input type="hidden" name="amount" value="<?= isset($amount) ? $amount : 0 ?>">
                             <div class="d-flex w-100 align-items-center">
-                                <div class="col-4">Tiền khách đưa:</div>
+                                <div class="col-4">Khách trả:</div>
                                 <div class="col-8">
                                     <input type="text" pattern="[0-9\.]*$" class="form-control form-control-lg rounded-0 text-right" id="tendered" name="tendered" value="" required />
                                 </div>
@@ -412,7 +423,7 @@ $tem_html = '';
             // el.find('tr.bg-gradient-navy').attr('style', "color:#000")
             // el.find('tr.bg-gradient-secondary').attr('style', "color:#000")
             start_loader();
-            var nw = window.open("", "_blank", "width=279")
+            var nw = window.open("", "_blank", "width=500")
             nw.document.querySelector('head').innerHTML = head.prop('outerHTML')
             nw.document.querySelector('body').innerHTML = el.prop('outerHTML')
             nw.document.close()

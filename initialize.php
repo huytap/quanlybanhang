@@ -24,7 +24,7 @@ const PAYMENT_METHOD = [
 const DRINK = [
     'TẠI TIỆM',
     'MANG ĐI',
-    'ONLINE'
+    'SHIP'
 ];
 date_default_timezone_set("Asia/Ho_Chi_Minh");
 $dev_data = array('id'=>'-1','firstname'=>'Developer','lastname'=>'','username'=>'dev_oretnom','password'=>'5da283a2d990e8d8512cf967df5bc0d0','last_login'=>'','date_updated'=>'','date_added'=>'');

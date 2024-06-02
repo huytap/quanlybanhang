@@ -14,6 +14,9 @@ if (isset($_GET['id'])) {
 }
 ?>
 <style>
+        #promotion{
+            border: 1px dashed red;
+        }
     #sales-panel {
         height: 70vh;
     }
@@ -78,7 +81,9 @@ if (isset($_GET['id'])) {
                         $promotion = $conn->query($sqlPromo);
                         $promotion_name = '';
                         $promotion_id = 0;
-                        if($promotion->num_rows){?>
+                        if($promotion->num_rows){
+                            $html_promo = '';
+                            ?>
                             <div id="promotion" class="w-100 mt-2 d-flex">
                                 <div class="col-12">
                                     <label for="client_name" class="control-label">Chương trình KM đang được áp dụng: </label>
@@ -93,6 +98,9 @@ if (isset($_GET['id'])) {
                                                     $productList = [];
                                                     while ($row2 = $prQry->fetch_array()) {
                                                         $productList[$row2['id']] = $row2['name'];
+                                                        if(!empty($html_promo)) $html_promo .=",";
+                                                        $html_promo .= $row2['name'];
+
                                                     }
                                                 }
                                             ?>
@@ -108,19 +116,26 @@ if (isset($_GET['id'])) {
                                         }
                                     ?>
                                     </span>
+                                    <div>Danh sách thực đơn tặng kèm: <i><?=$html_promo;?></i></div>
                                 </div>
                             </div>
                         <?php }?>
-                            <div class="col-lg-6 col-md-6 col-sm-6 col-xs-12">
+                            <div class="col-lg-4 col-md-4 col-sm-4 col-xs-12">
                                 <div class="form-group mb-3">
                                     <label for="client_name" class="control-label">Khách hàng</label>
                                     <input type="text" placeholder="" name="client_name" id="client_name" class="form-control form-control-sm rounded-0" value="<?= isset($client_name) ? $client_name : "Guest" ?>" required="required">
                                 </div>
                             </div>
-                            <div class="col-lg-6 col-md-6 col-sm-6 col-xs-12">
+                            <div class="col-lg-4 col-md-4 col-sm-4 col-xs-12">
                                 <div class="form-group mb-3">
                                     <label for="phone_number" class="control-label">SĐT</label>
-                                    <input type="text" placeholder="" name="phone_number" id="client_name" class="form-control form-control-sm rounded-0">
+                                    <input type="text" placeholder="" name="phone_number" value="<?php echo isset($phone_number)?$phone_number:'';?>" id="client_name" class="form-control form-control-sm rounded-0">
+                                </div>
+                            </div>
+                            <div class="col-lg-4 col-md-4 col-sm-4 col-xs-12">
+                                <div class="form-group mb-3">
+                                    <label for="time_shipping" class="control-label">Thời gian giao</label>
+                                    <input type="text" placeholder="" name="time_shipping" value="<?php echo isset($time_shipping)?$time_shipping:'';?>" id="client_name" class="form-control form-control-sm rounded-0">
                                 </div>
                             </div>
                         </div>
@@ -353,7 +368,7 @@ if (isset($_GET['id'])) {
     </div>
 </div>
 <noscript id="product-clone">
-    <tr>
+    <tr category_id="">
         <td class="px-2 py-1 align-middle" style="line-height:.9em">
             <p class="m-0 truncate-1">
                 <span class="product_name">Cafe</span>
@@ -391,6 +406,7 @@ if (isset($_GET['id'])) {
         <td class="px-2 py-1 align-middle">
             <input type="hidden" name="product_price[]">
             <input type="hidden" name="attribute_id[]">
+            
             <div class="quantity text-center">
                 <button type="button" class="btn btn-primary btn-minus"> 
                     <span class="fa fa-minus"></span>
@@ -510,7 +526,7 @@ if (isset($_GET['id'])) {
             }
         })
 
-        function changeQty(tr, type, name, promotion = ''){
+        function changeQty(tr, type, name, promotion = '', category_id){
             var qty = parseFloat($(tr).find('[name="product_qty[]"]').val())
             var price = $(tr).find('[name="product_price[]"]').val()
             var id = $(tr).find('[name="product_id[]"]').val()
@@ -543,7 +559,8 @@ if (isset($_GET['id'])) {
             var total = parseFloat(qty) * parseFloat(price)
             $(tr).find('.product_total').text(parseFloat(total).toLocaleString())
             calc_product()                            
-            if($(tr).next().attr('promotion') != 'true')
+            var category_id = $(tr).attr('category_id');
+            //if($(tr).next().attr('promotion') != 'true')
                 checkPromo(tr, id, name, category_id)
         }
         
@@ -554,13 +571,19 @@ if (isset($_GET['id'])) {
                     //arrPromo.push($(j).attr('data'))
                     var promotion = $(j).find('.promo').attr('data')
                     promotion = JSON.parse(promotion)
+                    var totalQty = 0
+                    $('#product-list').find('tbody').find('tr').each(function(i, j){
+                        var attr = $(this).attr('promotion');
+                        if (typeof attr == 'undefined') {
+                            totalQty += parseInt($(j).find('input[name="product_qty[]"]').val());
+                        }
+                    });
                     //danh mục mua gì tặng đó
                     var category_apply = promotion['category_apply']
                     var product_gift = promotion['product_ids']
-                    if(promotion['discount_type'] == 'PRODUCT'){
+                    if(promotion['discount_type'] == 'PRODUCT' && $.inArray(category_id, category_apply) > 0){
                         if(promotion['product_type'] == 'SAME' && promotion['buy'] > 0 && 
-                        promotion['buy'] <= $(tr).find('[name="product_qty[]"]').val() && 
-                        $.inArray(category_id, category_apply) > 0){
+                        promotion['buy'] <= $(tr).find('[name="product_qty[]"]').val()){
                             var trPromo = $($('noscript#product-clone').html()).clone()
                             trPromo.find('td:last-child').find('button').remove()
                             trPromo.find('input[name="product_id[]"]').val(id)
@@ -578,8 +601,8 @@ if (isset($_GET['id'])) {
                             $('#notes').removeClass('d-none')
                             return false;
                         }else if(promotion['product_type'] == 'LIST' && promotion['buy'] > 0 &&
-                        promotion['buy'] <= $(tr).find('[name="product_qty[]"]').val() && 
-                        $.inArray(category_id, category_apply) > 0){
+                        promotion['buy'] <= totalQty && (totalQty/promotion['buy'] == 1 || totalQty%promotion['buy'] == 0)
+                        ){
                             var productList = $(j).find('.promo').attr('data-product')
                             var htmlPr = ''
                             $.each(JSON.parse(productList), function(k, r){
@@ -605,7 +628,7 @@ if (isset($_GET['id'])) {
                             return false;
                         }else if(promotion['product_type'] == 'LIST' && promotion['min_amount'] > 0 &&
                         promotion['min_amount'] <= parseFloat($('#amount').text().replace(',', '')) && 
-                        $.inArray(category_id, category_apply) > 0 && !$('#product-list').hasClass('promotion')){
+                        !$('#product-list').hasClass('promotion')){
                             $('#product-list').addClass('promotion')
                             var productList = $(j).find('.promo').attr('data-product')
                             var htmlPr = ''
@@ -673,6 +696,7 @@ if (isset($_GET['id'])) {
             tr.find('.product_name').text(name)
             tr.find('.product_price').text('x ' + parseFloat(price).toLocaleString())
             tr.find('.product_total').text(parseFloat(price).toLocaleString())
+            tr.attr('category_id', category_id)
             $('#product-list tbody').append(tr)
             tr.find('.rem-product').click(function() {
                 if (confirm("Bạn có chắc chăn muốn xóa món " + name + " không?") === true) {

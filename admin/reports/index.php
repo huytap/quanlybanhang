@@ -108,12 +108,12 @@ if ($_settings->userdata('type') == 3) {
                         $i = 1;
                         $where = "";
                         if ($user_id > 0) {
-                            $where .= " and user_id = '{$user_id}' ";
+                            $where .= " and `user_id` = '{$user_id}' ";
                         }
                         if($payment_type != '' && $payment_type != 'all'){
                             $where .= " and payment_type = '{$payment_type}'";
                         }
-                        if($product_id != ''){
+                        if($product_id != 'all' && $product_id != ''){
                             $where .= " and product_id='{$product_id}'";
                         }
                         //$users_qry = $conn->query("SELECT id, concat(firstname, ' ', lastname) as `name` FROM `users` where id in (SELECT user_id FROM `sale_list` where date(date_created) = '{$date}' {$where}) ");
@@ -122,11 +122,17 @@ if ($_settings->userdata('type') == 3) {
                         // while ($rowu = $users_qry->fetch_assoc()) {
                         //     $user_arr[$rowu['id']] = $rowu['name'];
                         // }
-                        $sql = "SELECT s.*, concat(u.firstname, ' ', u.lastname) as `fullname` 
+                        $sql = "SELECT s.amount, s.date_updated , s.date_created, s.code, s.client_name, payment_type, concat(u.firstname, ' ', u.lastname) as `fullname` 
                         FROM `sale_list` as s
-                        LEFT JOIN users as u on s.user_id=u.id
-                        where s.deleted_flag=0 and date(s.date_created) = '{$date}' {$where} 
-                        order by unix_timestamp(s.date_updated) desc ";
+                        LEFT JOIN users as u on s.user_id=u.id";
+                        if($product_id != 'all' && $product_id != ''){
+                            $sql .= " LEFT JOIN sale_products sp on sp.sale_id=s.id";
+                        }
+                        $sql .= " where s.deleted_flag=0 and date(s.date_created) = '{$date}' {$where} ";
+                        if($product_id != 'all' && $product_id != ''){
+                            $sql .= " GROUP BY product_id, s.date_created, s.code, s.client_name, payment_type, firstname, u.lastname";
+                        }
+                        $sql .= " order by unix_timestamp(s.date_updated) desc ";
                         $qry = $conn->query($sql);
                         if($qry->num_rows > 0)
                         while ($row = $qry->fetch_assoc()) :
