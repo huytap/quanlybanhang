@@ -31,6 +31,17 @@ if (isset($_GET['id']) && $_GET['id'] > 0) {
 			<input type="text" name="name" id="name" class="form-control form-control-sm rounded-0" value="<?php echo isset($name) ? $name : ''; ?>" required />
 		</div>
 		<div class="form-group">
+			<label for="unit" class="control-label">Đơn vị tính</label>
+			<select name="unit" id="unit" class="form-control form-control-sm rounded-0" required>
+				<option value="" <?= !isset($category_id) ? "selected" : "" ?>>Chọn đơn vị tính</option>
+				<?php
+				foreach(UNIT as $uk => $uv) :
+				?>
+					<option value="<?= $uk ?>" <?php echo isset($unit) && $unit == $uk ? 'selected' : '' ?>><?= $uv ?></option>
+				<?php endforeach; ?>
+			</select>
+		</div>
+		<div class="form-group">
 			<label for="description" class="control-label">Mô tả</label>
 			<textarea type="text" name="description" id="description" class="form-control form-control-sm rounded-0" required><?php echo isset($description) ? $description : ''; ?></textarea>
 		</div>

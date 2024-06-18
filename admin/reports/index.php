@@ -1,11 +1,14 @@
 <?php
 $date = isset($_GET['date']) ? $_GET['date'] : date("Y-m-d");
+$date_to = isset($_GET['date_to']) ? $_GET['date_to'] : date("Y-m-d");
 $user_id = isset($_GET['user_id']) ? $_GET['user_id'] : 0;
 $product_id = isset($_GET['product_id']) ? $_GET['product_id'] : '';
 $payment_type = isset($_GET['payment_type']) ? $_GET['payment_type'] : '';
+$unit = isset($_GET['unit']) ? $_GET['unit'] : '';
 if ($_settings->userdata('type') == 3) {
     $user_id = $_settings->userdata('id');
 }
+$category_id = isset($_GET['category_id']) ? $_GET['category_id'] : '';
 ?>
 <?php if ($_settings->chk_flashdata('success')) : ?>
     <script>
@@ -13,9 +16,9 @@ if ($_settings->userdata('type') == 3) {
     </script>
 <?php endif; ?>
 <div class="card card-outline rounded-0 card-navy">
-    <div class="card-header">
+    <!-- <div class="card-header">
         <h3 class="card-title">Báo cáo</h3>
-    </div>
+    </div> -->
     <div class="card-body">
         <div class="container-fluid">
             <fieldset class="border px-2 mb-2 ,x-2">
@@ -24,8 +27,14 @@ if ($_settings->userdata('type') == 3) {
                     <div class="row align-items-end">
                         <div class="col-lg-2 col-md-4 col-sm-12 col-xs-12">
                             <div class="form-group">
-                                <label for="date">Ngày</label>
+                                <label for="date">Từ ngày</label>
                                 <input type="date" name="date" value="<?= $date ?>" class="form-control form-control-sm rounded-0" required>
+                            </div>
+                        </div>
+                        <div class="col-lg-2 col-md-4 col-sm-12 col-xs-12">
+                            <div class="form-group">
+                                <label for="date_to">Đến ngày</label>
+                                <input type="date" name="date_to" value="<?= $date_to ?>" class="form-control form-control-sm rounded-0" required>
                             </div>
                         </div>
                         <?php if ($_settings->userdata('type') != 3) : ?>
@@ -46,6 +55,33 @@ if ($_settings->userdata('type') == 3) {
                         <?php endif; ?>
                         <div class="col-lg-2 col-md-4 col-sm-12 col-xs-12">
                             <div class="form-group">
+                                <label for="category_id">Danh mục</label>
+                                <select name="category_id" class="form-control form-control-sm">
+                                    <option value="0" <?= $category_id == 0 ? 'selected' : '' ?>>Tất cả</option>
+                                    <?php
+                                    $qry2 = $conn->query("SELECT * from category_list order by `name` asc");
+                                    while ($row2 = $qry2->fetch_assoc()) :
+                                    ?>
+                                        <option value="<?= $row2['id'] ?>" <?= $category_id == $row2['id'] ? 'selected' : '' ?>><?= $row2['name'] ?></option>
+                                    <?php endwhile; ?>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-lg-2 col-md-4 col-sm-12 col-xs-12">
+                            <div class="form-group">
+                                <label for="unit">Đơn vị</label>
+                                <select name="unit" id="unit" class="form-control form-control-sm rounded-0">
+                                    <option value="" <?= !isset($category_id) ? "selected" : "" ?>>Tất cả</option>
+                                    <?php
+                                    foreach(UNIT as $uk => $uv) :
+                                    ?>
+                                        <option value="<?= $uk ?>" <?php echo isset($unit) && $unit == $uk ? 'selected' : '' ?>><?= $uv ?></option>
+                                    <?php endforeach; ?>
+                                </select>
+                            </div>
+                        </div>
+                        <!-- <div class="col-lg-2 col-md-4 col-sm-12 col-xs-12">
+                            <div class="form-group">
                                 <label for="product_id">Thực đơn</label>
                                 <select name="product_id" class="form-control form-control-sm">
                                     <option value="all">Tất cả</option>
@@ -57,7 +93,7 @@ if ($_settings->userdata('type') == 3) {
                                     <?php endwhile; ?>
                                 </select>
                             </div>
-                        </div>
+                        </div> -->
                         <div class="col-lg-2 col-md-4 col-sm-12 col-xs-12">
                             <div class="form-group">
                                 <label for="payment_type">Hình thức TT</label>
@@ -82,88 +118,13 @@ if ($_settings->userdata('type') == 3) {
                 </form>
             </fieldset>
             <div class="container-fluid" id="printout">
-                <table class="table table-hover table-striped table-bordered" id="report-list">
-                    <colgroup>
-                        <col width="5%">
-                        <col width="20%">
-                        <col width="20%">
-                        <col width="25%">
-                        <col width="15%">
-                        <col width="15%">
-                    </colgroup>
-                    <thead>
-                        <tr>
-                            <th>#</th>
-                            <th>Ngày bán</th>
-                            <th>Số HĐ</th>
-                            <th>Khách hàng</th>
-                            <th>Hình thức TT</th>
-                            <th>Nhân viên</th>
-                            <th>Tiền</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <?php
-                        $total = 0;
-                        $i = 1;
-                        $where = "";
-                        if ($user_id > 0) {
-                            $where .= " and `user_id` = '{$user_id}' ";
-                        }
-                        if($payment_type != '' && $payment_type != 'all'){
-                            $where .= " and payment_type = '{$payment_type}'";
-                        }
-                        if($product_id != 'all' && $product_id != ''){
-                            $where .= " and product_id='{$product_id}'";
-                        }
-                        //$users_qry = $conn->query("SELECT id, concat(firstname, ' ', lastname) as `name` FROM `users` where id in (SELECT user_id FROM `sale_list` where date(date_created) = '{$date}' {$where}) ");
-                        //$user_arr = array_column($users_qry->fetch_all(MYSQLI_ASSOC), 'name', 'id');
-                        // $user_arr = [];
-                        // while ($rowu = $users_qry->fetch_assoc()) {
-                        //     $user_arr[$rowu['id']] = $rowu['name'];
-                        // }
-                        $sql = "SELECT s.amount, s.date_updated , s.date_created, s.code, s.client_name, payment_type, concat(u.firstname, ' ', u.lastname) as `fullname` 
-                        FROM `sale_list` as s
-                        LEFT JOIN users as u on s.user_id=u.id";
-                        if($product_id != 'all' && $product_id != ''){
-                            $sql .= " LEFT JOIN sale_products sp on sp.sale_id=s.id";
-                        }
-                        $sql .= " where s.deleted_flag=0 and date(s.date_created) = '{$date}' {$where} ";
-                        if($product_id != 'all' && $product_id != ''){
-                            $sql .= " GROUP BY product_id, s.date_created, s.code, s.client_name, payment_type, firstname, u.lastname";
-                        }
-                        $sql .= " order by unix_timestamp(s.date_updated) desc ";
-                        $qry = $conn->query($sql);
-                        if($qry->num_rows > 0)
-                        while ($row = $qry->fetch_assoc()) :
-                            $total += $row['amount'];
-                        ?>
-                            <tr>
-                                <td class="text-center"><?php echo $i++; ?></td>
-                                <td>
-                                    <p class="m-0"><?= date("d/m/Y H:i", strtotime($row['date_updated'])) ?></p>
-                                </td>
-                                <td>
-                                    <p class="m-0"><?= $row['code'] ?></p>
-                                </td>
-                                <td>
-                                    <p class="m-0"><?= $row['client_name'] ?></p>
-                                </td>
-                                <td>
-                                    <p class="m-0"><?= PAYMENT_METHOD[$row['payment_type']] ?></p>
-                                </td>
-                                <td class=''><?= $row['fullname'] ?></td>
-                                <td class='text-right'><?= number_format($row['amount'], 0) ?></td>
-                            </tr>
-                        <?php endwhile; ?>
-                    </tbody>
-                    <tfoot>
-                        <tr>
-                            <th colspan="6" class="text-center">Tổng tiền</th>
-                            <th class="text-right"><?= number_format($total, 0) ?></th>
-                        </tr>
-                    </tfoot>
-                </table>
+                <?php 
+                if($unit){
+                    include_once("_unit.php");
+                }else{
+                    include_once("_not_unit.php");
+                }
+                ?>
             </div>
         </div>
     </div>

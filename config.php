@@ -3,7 +3,19 @@ ob_start();
 ini_set('date.timezone','Asia/Ho_Chi_Minh');
 date_default_timezone_set('Asia/Ho_Chi_Minh');
 session_start();
-
+const MAIN = [
+    1 => 'Bánh',
+    2 => 'Đồ uống',
+    3 => 'Đồ ăn',
+    4 => 'Tượng'
+];
+const UNIT = [
+    1 => 'Cái',
+    2 => 'Ly',
+    3 => 'Phần',
+    4 => 'Túi',
+    5 => 'Hộp'
+];
 require_once('initialize.php');
 require_once('classes/DBConnection.php');
 require_once('classes/SystemSettings.php');

@@ -40,7 +40,7 @@ $tem_html = '';
                                     <b>Số HĐ:</b> <?= isset($code) ? $code : "" ?>
                                 </div>
                                 <div class="col-6">
-                                    <b>Ngày:</b> <?= isset($date_created) ? date("d/m/Y h:i", strtotime($date_created)) : "" ?>
+                                    <b>Ngày:</b> <?= isset($date_created) ? date("d/m/Y H:i", strtotime($date_created)) : "" ?>
                                 </div>
                             </div>
                             <div class="d-flex invoice-no">
