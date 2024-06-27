@@ -10,7 +10,13 @@
           <?php
           $date = date('Y-m-d');
           //$date = '2024-05-30';
-          $sql = "SELECT id 
+          if ($_settings->userdata('type') == 3)
+            $sql = "SELECT id 
+                  FROM `sale_list` as s
+                  LEFT JOIN `sale_products` as sp ON sp.sale_id=s.id
+                  WHERE  user_id = '{$_settings->userdata('id')}' and deleted_flag=0 and date(date_created) = '{$date}'";
+          else
+            $sql = "SELECT id 
                   FROM `sale_list` as s
                   LEFT JOIN `sale_products` as sp ON sp.sale_id=s.id
                   WHERE deleted_flag=0 and date(date_created) = '{$date}'";
@@ -52,7 +58,7 @@
         <span class="info-box-number text-right">
           <?php
           if ($_settings->userdata('type') == 3) :
-            $total = $conn->query("SELECT sum(amount) as total FROM sale_list where user_id = '{$_settings->userdata('id')}' ");
+            $total = $conn->query("SELECT sum(amount) as total FROM sale_list where user_id = '{$_settings->userdata('id')}'  and date(date_created) = '{$date}'");
           else :
             $total = $conn->query("SELECT sum(amount) as total FROM sale_list");
           endif;
