@@ -14,10 +14,10 @@
     <?php endif; ?>
     <?php $page = isset($_GET['page']) ? $_GET['page'] : 'home';  ?>
     <!-- Content Wrapper. Contains page content -->
-    <div class="content-wrapper  pt-3 pb-4" style="min-height: 567.854px;">
+    <div class="content-wrapper pt-3 pb-4" style="min-height: 567.854px;">
 
       <!-- Main content -->
-      <section class="content  text-dark">
+      <section class="text-dark">
         <div class="container-fluid">
           <?php
           if (!file_exists($page . ".php") && !is_dir($page)) {

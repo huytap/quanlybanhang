@@ -45,17 +45,17 @@ $tem_html = '';
                             </div>
                             <div class="d-flex invoice-no">
                                 <div class="col-sm-6">
-                                    <b>Khách hàng:</b> <?php echo $client_name;?>
+                                    <b>Khách hàng:</b> <?php echo $client_name; ?>
                                 </div>
                                 <div class="col-sm-6">
                                     <b>SĐT:</b> <?= isset($phone_number) ? $phone_number : "" ?>
                                 </div>
                             </div>
-                            <?php if(isset($time_shipping)){?>
+                            <?php if (isset($time_shipping)) { ?>
                                 <div class="col-sm-12">
                                     <b>Giao:</b> <?= $time_shipping ?>
                                 </div>
-                            <?php }?>
+                            <?php } ?>
                             <div class="mb-2"></div>
                             <h6 class="d-flex border-bottom border-dark pb-1">
                                 <div class="col-8">Thực đơn</div>
@@ -76,21 +76,21 @@ $tem_html = '';
                                 $stt = 1;
                                 $arrayTemp = [];
                                 $totalQty = $totalSummary = 0;
-                                if($sp_query->num_rows > 0)
-                                //$sp_query = $conn->query("SELECT sp.*, p.name as `product` FROM `sale_products` sp inner join `product_list` p on sp.product_id =p.id where sp.sale_id = '{$id}'");
-                                while ($row = $sp_query->fetch_assoc()) :
-                                    $promotion_name = $row['pr_name'];
-                                    $totalSummary += $row['qty'];
-                                    if($row['has_print_tem'] == 1){
-                                        $totalQty += $row['qty'];
-                                        //$tem_html .= '<h6>'.$row['product'].'</h6>';
-                                        $arrayTemp[$stt] = [
-                                            'name' => $row['product'],
-                                            'code' => $row['code'],
-                                            'price' => number_format($row['price'], 0),
-                                            'quantity' => $row['qty']
-                                        ];
-                                    }
+                                if ($sp_query->num_rows > 0)
+                                    //$sp_query = $conn->query("SELECT sp.*, p.name as `product` FROM `sale_products` sp inner join `product_list` p on sp.product_id =p.id where sp.sale_id = '{$id}'");
+                                    while ($row = $sp_query->fetch_assoc()) :
+                                        $promotion_name = $row['pr_name'];
+                                        $totalSummary += $row['qty'];
+                                        if ($row['has_print_tem'] == 1) {
+                                            $totalQty += $row['qty'];
+                                            //$tem_html .= '<h6>'.$row['product'].'</h6>';
+                                            $arrayTemp[$stt] = [
+                                                'name' => $row['product'],
+                                                'code' => $row['code'],
+                                                'price' => number_format($row['price'], 0),
+                                                'quantity' => $row['qty']
+                                            ];
+                                        }
                                 ?>
                                     <div class="d-flex border-bottom border-dark mb-1 pb-1">
                                         <div class="col-8" style="line-height:.9em">
@@ -106,7 +106,7 @@ $tem_html = '';
                                                 //     $tem_html .= '<i style="display:block;font-size:11px;">';
                                                 // }
                                                 while ($row2 = $q->fetch_assoc()) :
-                                                    $tem_html .= $row2['name']; 
+                                                    $tem_html .= $row2['name'];
                                                     $attrStr .= $row2['name'];
                                                     echo $row2['name'];
                                                     if ($r < $q->num_rows - 1) {
@@ -128,11 +128,11 @@ $tem_html = '';
                                         <div class="col-1 text-center"><?= $row['qty'] ?></div>
                                         <div class="col-3 text-right"><?= number_format($row['price'] * $row['qty']) ?></div>
                                     </div>
-                                <?php 
-                                //$tem_html .= '<p>Số HĐ: '.$row['code'] . ' - #'. $stt .'/' .$row['totalQty'].'</p>';
-                                $stt++;
-                            endwhile; 
-                            ?>
+                                <?php
+                                        //$tem_html .= '<p>Số HĐ: '.$row['code'] . ' - #'. $stt .'/' .$row['totalQty'].'</p>';
+                                        $stt++;
+                                    endwhile;
+                                ?>
                             <?php endif; ?>
                             <h6 class="d-flex border-dark" style="font-size: 18px">
                                 <div class="col-8 text-bold">Tổng cộng</div>
@@ -147,7 +147,7 @@ $tem_html = '';
                                     ?>
                                 </div>
                                 <div class="col-5 text-right">
-                                <?= isset($amount) ? format_num($amount, 0) : 0 ?>
+                                    <?= isset($amount) ? format_num($amount, 0) : 0 ?>
                                 </div>
                             </div>
                             <?php if ($status == '1') { ?>
@@ -156,20 +156,22 @@ $tem_html = '';
                                     <div class="col-7 text-right"><?= isset($tendered) ? format_num($tendered, 0) : 0 ?></div>
                                 </div>
                                 <?php
-                                    $payment_type = isset($payment_type) ? $payment_type : 0;
-                                    if($payment_type == 1){
-                                    ?>
+                                $payment_type = isset($payment_type) ? $payment_type : 0;
+                                if ($payment_type == 1) {
+                                ?>
                                     <div class="d-flex">
                                         <div class="col-4">Tiền thừa</div>
                                         <div class="col-8 text-right"><?= isset($amount) && isset($tendered) ? format_num($tendered - $amount, 0) : 0 ?></div>
                                     </div>
-                                <?php }?>
-                                <?php //if ($payment_type > 1) : ?>
-                                    <!-- <h6 class="d-flex">
+                                <?php } ?>
+                                <?php //if ($payment_type > 1) : 
+                                ?>
+                                <!-- <h6 class="d-flex">
                                         <div class="col-4">Số tham chiếu</div>
                                         <div class="col-8 text-right"><?= isset($payment_code) ? $payment_code : "" ?></div>
                                     </h6> -->
-                                <?php //endif; ?>
+                                <?php //endif; 
+                                ?>
                             <?php } ?>
                             <?php if ($promotion_name) : ?>
                                 <div id="notes" class="d-flex font-italic">
@@ -189,7 +191,7 @@ $tem_html = '';
                                 </div>
                             </div> -->
                             <!-- <div class="text-bold text-center">Cảm ơn Quý khách - Hẹn gặp lại!</div> -->
-                        </div>                        
+                        </div>
                     </div>
                     <?php if ($status != '1') { ?>
                         <form method="post" id="sale-form">
@@ -246,13 +248,15 @@ $tem_html = '';
                 <?php
                 $today = date('Y-m-d');
                 if ($today <= $date_created && $_settings->userdata('type') == 1) { ?>
-                    <a class="btn btn-primary bg-gradient-primary border col-lg-3 col-md-4 col-sm-12 col-xs-12 rounded-pill" href="./?page=sales/manage_sale&id=<?= isset($id) ? $id : '' ?>"><i class="fa fa-edit"></i> Chỉnh sửa</a>
+                    <a class="mb-3 btn btn-primary bg-gradient-primary border col-lg-3 col-md-4 col-sm-12 col-4 rounded-pill" href="./?page=sales/manage_sale&id=<?= isset($id) ? $id : '' ?>"><i class="fa fa-edit"></i> Chỉnh sửa</a>
                 <?php } ?>
-                <button class="btn btn-light bg-gradient-light border col-lg-3 col-md-4 col-sm-12 col-xs-12 rounded-pill" id="print"><i class="fa fa-print"></i> In đơn</button>
-                <?php if($totalQty > 0){?>
-                    <button class="btn btn-light bg-gradient-light border col-lg-3 col-md-4 col-sm-12 col-xs-12 rounded-pill" id="print_tem"><i class="fa fa-print"></i> In tem</button>
+                <button class="mb-3 btn btn-light bg-gradient-light border col-lg-3 col-md-4 col-sm-12 col-4 rounded-pill" id="print"><i class="fa fa-print"></i> In đơn</button>
+                <?php if ($totalQty > 0) { ?>
+                    <button class="mb-3 btn btn-light bg-gradient-light border col-lg-3 col-md-4 col-sm-12 col-4 rounded-pill" id="print_tem"><i class="fa fa-print"></i> In tem</button>
                 <?php
                 }
+                ?>
+                <?php
                 if ($today <= $date_created && $_settings->userdata('type') == 1) { ?>
                     <button class="btn btn-danger bg-gradient-danger border col-lg-3 col-md-4 col-sm-12 col-xs-12 rounded-pill" id="delete_sale" type="button"><i class="fa fa-trash"></i> Hủy đơn</button>
                 <?php } ?>
@@ -300,17 +304,19 @@ $tem_html = '';
             background-color: #fff;
             border-color: #fff;
         }
+
         @page {
-            size:portrait;
+            size: portrait;
             margin: 7px;
-            padding:0;
+            padding: 0;
         }
-        .btn.btn-warning{
+
+        .btn.btn-warning {
             background-color: transparent;
-            color:#000;
+            color: #000;
             border-radius: 0;
-            border:0;
-            padding:0
+            border: 0;
+            padding: 0
         }
     </style>
     <div class="d-flex receipt-header">
@@ -330,74 +336,83 @@ $tem_html = '';
             color: #000;
             margin: 0;
         }
-        .receipt-header{
+
+        .receipt-header {
             width: 67mm;
         }
-        .print-content{
+
+        .print-content {
             height: 35mm;
             border: 2px solid #000;
             border-radius: 5px;
             padding: 5px;
         }
-        .product-info{
+
+        .product-info {
             height: 22mm;
-            overflow: hidden;            
+            overflow: hidden;
         }
-        h6{
+
+        h6 {
             font-weight: bold;
             font-size: 17px;
-            padding:0;
-            margin:0;
+            padding: 0;
+            margin: 0;
             text-transform: uppercase;
         }
+
         @page {
             size: landscape;
             margin: 7px;
-            padding:0;
+            padding: 0;
         }
-        .brand{
+
+        .brand {
             font-weight: bold;
             font-size: 13px;
         }
-        .breakpage{
+
+        .breakpage {
             page-break-after: always;
             padding-top: 7px;
             margin-top: 7px;
-        } 
-        .attribute{
+        }
+
+        .attribute {
             border-bottom: 1px dashed #000;
         }
-       
-        
+
+
         /* @media print { 
             .breakpage {page-break-before: always;} 
         }  */
     </style>
     <div class="receipt-header">
         <?php
-        foreach($arrayTemp as $key => $temp){
-            for($i=0;$i<$temp['quantity'];$i++){
-            ?>
-            <div class="print-content">
-                <div class="product-info">
-                    <h6><?= $temp['name'];?></h6>
-                    <div class="attribute">
-                        <?php if(isset($temp['attribute'])){?>
-                            <div style="display:block;font-size:15px;"><?php echo $temp['attribute'];?></div>
-                        <?php }?>
+        foreach ($arrayTemp as $key => $temp) {
+            for ($i = 0; $i < $temp['quantity']; $i++) {
+        ?>
+                <div class="print-content">
+                    <div class="product-info">
+                        <h6><?= $temp['name']; ?></h6>
+                        <div class="attribute">
+                            <?php if (isset($temp['attribute'])) { ?>
+                                <div style="display:block;font-size:15px;"><?php echo $temp['attribute']; ?></div>
+                            <?php } ?>
+                        </div>
                     </div>
-                </div>
-                <div class="brand"">
-                    <div style="width: 70%;display: inline-block;">No.<?=$temp['code'] . ' #'. ($key+$i) .'/' .$totalQty;?></div><div style="display: inline-block;width: 30%; text-align:right;"><?php echo $temp['price'];?></div>
+                    <div class="brand"">
+                    <div style=" width: 70%;display: inline-block;">No.<?= $temp['code'] . ' #' . ($key + $i) . '/' . $totalQty; ?></div>
+                    <div style="display: inline-block;width: 30%; text-align:right;"><?php echo $temp['price']; ?></div>
                     SKUN- 0344 384 234
                 </div>
-            </div>
-            <?php
-            }
-        } 
-        ?>
     </div>
-    <div class="breakpage"></div>
+<?php
+            }
+        }
+?>
+</div>
+<div class="breakpage"></div>
 </noscript>
 <script>
     $(function() {
@@ -422,19 +437,19 @@ $tem_html = '';
             // })
             // el.find('tr.bg-gradient-navy').attr('style', "color:#000")
             // el.find('tr.bg-gradient-secondary').attr('style', "color:#000")
-            start_loader();
+            //start_loader();
             var nw = window.open("", "_blank", "width=500")
             nw.document.querySelector('head').innerHTML = head.prop('outerHTML')
             nw.document.querySelector('body').innerHTML = el.prop('outerHTML')
             nw.document.close()
-            setTimeout(() => {
-                nw.print()
-                setTimeout(() => {
-                    nw.close()
-                    end_loader()
-                    location.href = '<?php echo base_url ;?>/admin/?page=sales/index'
-                }, 300)
-            }, 500)
+            // setTimeout(() => {
+            //     nw.print()
+            //     setTimeout(() => {
+            //         nw.close()
+            //         end_loader()
+            //         location.href = '<?php echo base_url; ?>/admin/?page=sales/index'
+            //     }, 300)
+            // }, 500)
         })
         $('#print_tem').click(function() {
             var head = $('head').clone()

@@ -3,7 +3,7 @@ $date = isset($_GET['date']) ? $_GET['date'] : date("Y-m-d");
 $date_to = isset($_GET['date_to']) ? $_GET['date_to'] : date("Y-m-d");
 $user_id = isset($_GET['user_id']) ? $_GET['user_id'] : 0;
 $product_id = isset($_GET['product_id']) ? $_GET['product_id'] : '';
-$payment_type = isset($_GET['payment_type']) ? $_GET['payment_type'] : '';
+$payment_type = isset($_GET['payment_type']) ? $_GET['payment_type'] : 'all';
 $unit = isset($_GET['unit']) ? $_GET['unit'] : '';
 if ($_settings->userdata('type') == 3) {
     $user_id = $_settings->userdata('id');
@@ -38,7 +38,7 @@ $category_id = isset($_GET['category_id']) ? $_GET['category_id'] : '';
                             </div>
                         </div>
                         <?php if ($_settings->userdata('type') != 3) : ?>
-                            <div class="col-lg-2 col-md-4 col-sm-12 col-xs-12">
+                            <div class="col-lg-1 col-md-4 col-sm-12 col-xs-12">
                                 <div class="form-group">
                                     <label for="user_id">Nhân viên</label>
                                     <select name="user_id" class="form-control form-control-sm" required>
@@ -67,7 +67,7 @@ $category_id = isset($_GET['category_id']) ? $_GET['category_id'] : '';
                                 </select>
                             </div>
                         </div>
-                        <div class="col-lg-2 col-md-4 col-sm-12 col-xs-12">
+                        <div class="col-lg-1 col-md-2 col-sm-12 col-xs-12">
                             <div class="form-group">
                                 <label for="unit">Đơn vị</label>
                                 <select name="unit" id="unit" class="form-control form-control-sm rounded-0">
@@ -100,10 +100,9 @@ $category_id = isset($_GET['category_id']) ? $_GET['category_id'] : '';
                                 <select name="payment_type" class="form-control form-control-sm">
                                     <option value="all">Tất cả</option>
                                     <?php
-                                    
                                     foreach(PAYMENT_METHOD as $k => $p) :
                                     ?>
-                                        <option value="<?= $k ?>" <?= $payment_type == $k ? 'selected' : '' ?>><?= $p ?></option>
+                                        <option value="<?= $k ?>" <?php if($payment_type == $k) echo 'selected="selected"'; ?>><?= $p ?></option>
                                     <?php endforeach; ?>
                                 </select>
                             </div>

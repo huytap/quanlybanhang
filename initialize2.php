@@ -3,7 +3,7 @@ const ATTR = [
     0 => 'Size',
     1 => 'Topping',
     2 => 'Mức đá',
-    3 => 'Mức đường',
+    3 => 'Mức đường'
 ];
 const PROMOTION_TYPE = [
     'PERCENT' => 'Giảm %',
@@ -13,13 +13,13 @@ const PROMOTION_TYPE = [
 const PRODUCT_GIFT = [
     'SAME' => 'Sản phẩm cùng loại',
     'LIST' => 'Sản phẩm trong danh sách',
-    'ANY' => 'Sản phẩm tự chọn'
+    'ANY' => 'Sn phẩm tự chọn'
 ];
 const PAYMENT_METHOD = [
-    0 => 'N/A',
     1 => 'Tiền mặt',
     2 => 'Chuyển khoản',
-    3 => 'Credit Card'
+    3 => 'Credit Card',
+    99 => 'N/A'
 ];
 const DRINK = [
     'TẠI TIỆM',

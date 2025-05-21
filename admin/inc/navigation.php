@@ -56,6 +56,12 @@
                     Báo cáo bán hàng
                   </p>
                 </a>
+                <a href="<?php echo base_url ?>admin/?page=reports/report_month" class="nav-link nav-reports">
+                  <i class="nav-icon fas fa-calendar-day"></i>
+                  <p>
+                    Báo cáo tổng hợp
+                  </p>
+                </a>
               </li>
               <?php if ($_settings->userdata('type') == 1) : ?>
                 <li class="nav-header">Maintenance</li>

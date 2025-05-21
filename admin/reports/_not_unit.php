@@ -26,26 +26,39 @@
         if ($user_id > 0) {
             $where .= " and `user_id` = '{$user_id}' ";
         }
-        if($payment_type != '' && $payment_type != 'all'){
+        if ($payment_type != '' && $payment_type != 'all') {
             $where .= " and payment_type = '{$payment_type}'";
         }
+
         
-        $sql = "SELECT s.amount, s.date_updated , s.date_created, s.code, s.client_name, payment_type, concat(u.firstname, ' ', u.lastname) as `fullname` 
-        FROM `sale_list` as s
-        LEFT JOIN users as u on s.user_id=u.id
-        where s.deleted_flag=0 and date(s.date_created) = '{$date}' {$where}
-        order by unix_timestamp(s.date_updated) desc ";
+        $group_by = '';
+        if($category_id > 0){
+            $sql = "SELECT sum(s.price*s.qty) as amount, sl.date_updated , sl.date_created, sl.code, sl.client_name, payment_type, concat(u.firstname, ' ', u.lastname) as `fullname` 
+            FROM `sale_products` as s
+            JOIN sale_list sl ON sl.id=s.sale_id
+            LEFT JOIN users as u on sl.user_id=u.id
+            JOIN product_list p ON p.id=s.product_id
+            JOIN category_list c ON c.id=p.category_id
+            where sl.deleted_flag=0 and date(sl.date_created) between '{$date}' and '{$date_to}' and c.id='{$category_id}' {$where}
+            group by  sl.date_updated , sl.date_created, sl.code, sl.client_name, payment_type, u.firstname, u.lastname";
+        }else{
+            $sql = "SELECT s.amount, s.date_updated , s.date_created, s.code, s.client_name, payment_type, concat(u.firstname, ' ', u.lastname) as `fullname` 
+            FROM `sale_list` as s
+            LEFT JOIN users as u on s.user_id=u.id
+            where s.deleted_flag=0 and date(s.date_created) between '{$date}' and '{$date_to}' {$where}
+            order by unix_timestamp(s.date_updated) desc ";
+        }
         //$users_qry = $conn->query("SELECT id, concat(firstname, ' ', lastname) as `name` FROM `users` where id in (SELECT user_id FROM `sale_list` where date(date_created) = '{$date}' {$where}) ");
         //$user_arr = array_column($users_qry->fetch_all(MYSQLI_ASSOC), 'name', 'id');
         // $user_arr = [];
         // while ($rowu = $users_qry->fetch_assoc()) {
         //     $user_arr[$rowu['id']] = $rowu['name'];
         // }
-        
+
         $qry = $conn->query($sql);
-        if($qry->num_rows > 0)
-        while ($row = $qry->fetch_assoc()) :
-            $total += $row['amount'];
+        if ($qry->num_rows > 0)
+            while ($row = $qry->fetch_assoc()) :
+                $total += $row['amount'];
         ?>
             <tr>
                 <td class="text-center"><?php echo $i++; ?></td>
